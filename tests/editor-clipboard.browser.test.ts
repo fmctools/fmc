@@ -46,7 +46,7 @@ const importBins = (files: File[]) =>
 /** A layer that actually carries pixels — the interesting case for the asset handling. */
 const withFrames = (): Layer => layers().find((l) => framesOf(l).length > 0)!;
 
-test("paste into the same document adds copies that share the original's assets", async () => {
+test("paste into the same document adds copies with private assets", async () => {
   await load("clip-same", dialUrl);
   const src = withFrames();
   const n = layers().length;
@@ -60,8 +60,18 @@ test("paste into the same document adds copies that share the original's assets"
   const copy = layers().at(-1)!;
 
   expect(copy.id).not.toBe(src.id);
-  expect(framesOf(copy)).toEqual(framesOf(src)); // same ids: no pixels were duplicated
-  expect(doc().images.size).toBe(assets);
+  const sourceFrames = framesOf(src);
+  const copiedFrames = framesOf(copy);
+
+  expect(copiedFrames).toHaveLength(sourceFrames.length);
+  expect(copiedFrames.some((id) => sourceFrames.includes(id))).toBe(false);
+  expect(doc().images.size).toBe(assets + new Set(copiedFrames).size);
+  copiedFrames.forEach((id, index) => {
+    const sourceId = sourceFrames[index];
+
+    expect(doc().images.get(id)!.data).not.toBe(doc().images.get(sourceId)!.data);
+    expect(doc().images.get(id)!.data).toEqual(doc().images.get(sourceId)!.data);
+  });
   // and the paste is what's selected, the way it behaves in any editor
   expect(editorModel.$sel.getState()).toBe(copy.id);
 });
@@ -118,6 +128,8 @@ test("copying multiple layers pastes all of them, selected together", async () =
 test("cut removes the layers and still pastes them back", async () => {
   await load("clip-cut", dialUrl);
   const src = withFrames();
+  const sourceFrames = framesOf(src);
+  const sourceData = sourceFrames.map((id) => doc().images.get(id)!.data);
   const n = layers().length;
 
   editorModel.select(src.id);
@@ -129,9 +141,13 @@ test("cut removes the layers and still pastes them back", async () => {
   expect(layers().length).toBe(n);
   const back = layers().at(-1)!;
 
-  // the clipboard was filled before the delete, so the pixels came back with it
-  expect(framesOf(back)).toEqual(framesOf(src));
-  expect(framesOf(back).every((id) => doc().images.has(id))).toBe(true);
+  // the clipboard was filled before the delete, so the pixels came back under fresh ids
+  const pastedFrames = framesOf(back);
+
+  expect(pastedFrames).toHaveLength(sourceFrames.length);
+  expect(pastedFrames.some((id) => sourceFrames.includes(id))).toBe(false);
+  expect(pastedFrames.every((id) => doc().images.has(id))).toBe(true);
+  expect(pastedFrames.map((id) => doc().images.get(id)!.data)).toEqual(sourceData);
 });
 
 test("importing several .bin files pastes every file's layers, each with its own pixels", async () => {

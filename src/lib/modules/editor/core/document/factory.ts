@@ -232,12 +232,27 @@ export const newCondition = (): Condition => ({ source: 0x19, op: "gte", value: 
 // byte (meaning unknown) so a round trip stays exact. The 0x86 node toLegacy writes is derived
 // from `name`, so it needs nothing here.
 export function withName(doc: Doc, name: string): Doc {
-  const tail = doc.nameRaw ? unhex(doc.nameRaw)[15] : 0x0a;
+  const tail = capabilityByte(doc);
   const head = new Uint8Array(16);
 
   new TextEncoder().encodeInto(name.slice(0, 14), head.subarray(0, 15));
   head[15] = tail;
   return { ...doc, name, nameRaw: hex(head) };
+}
+
+/** Byte 0x17 controls which on-watch customization modes a face exposes. It is the last byte
+ *  of the 16-byte header name field and buildBin mirrors the whole header into the footer. */
+export const capabilityByte = (doc: Doc): number =>
+  doc.nameRaw ? (unhex(doc.nameRaw)[15] ?? 0x0a) : 0x0a;
+
+export function withCapabilityByte(doc: Doc, byte: number): Doc {
+  const head = doc.nameRaw ? unhex(doc.nameRaw).slice() : new Uint8Array(16);
+
+  if (!doc.nameRaw) {
+    new TextEncoder().encodeInto((doc.name ?? "").slice(0, 14), head.subarray(0, 15));
+  }
+  head[15] = byte & 0xff;
+  return { ...doc, nameRaw: hex(head) };
 }
 
 const assetOf = (r: Resource): ImageAsset => ({

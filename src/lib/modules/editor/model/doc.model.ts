@@ -8,7 +8,7 @@
 import { createEvent, createStore, sample } from "effector";
 import { reset } from "patronum";
 import { findLayer, patchLayer } from "../core/document/edits";
-import { withName } from "../core/document/factory";
+import { withCapabilityByte, withName } from "../core/document/factory";
 import {
   toLegacy,
   type Doc,
@@ -70,6 +70,7 @@ export const checkpoint = createEvent<number | void>();
 export const undo = createEvent();
 export const redo = createEvent();
 export const renameFace = createEvent<string>();
+export const capabilityByteSet = createEvent<number>();
 /** A freshly opened or created document, replacing whatever was loaded. `cache` carries the
  *  decoded pixels, so the document and something to draw arrive in the same update. */
 export const docLoaded = createEvent<{
@@ -150,6 +151,13 @@ sample({
   filter: (doc, name) => Boolean(doc && doc.name !== name),
   fn: (doc, name) => withName(doc!, name),
   target: $doc,
+});
+sample({
+  clock: capabilityByteSet,
+  source: $doc,
+  filter: Boolean,
+  fn: (doc, byte) => ({ edit: (current: Doc) => withCapabilityByte(current, byte) }),
+  target: committed,
 });
 
 // ---- history ----
