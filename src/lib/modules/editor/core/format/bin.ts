@@ -113,8 +113,21 @@ function parseRefTail(
 }
 
 // Fixed-layout leaves the speculative TLV descent must not split: a slot's `00 06 00 …` reads as
-// a zero tag of length 6 (seen on the Watch Pro 3), and the document reads these by `hex`.
-const LEAF = new Set<number>([TAG.bind, TAG.fmt, TAG.frame, TAG.arc, TAG.arcClipped, TAG.slot]);
+// a zero tag of length 6 (seen on the Watch Pro 3), and the document reads these by `hex`. The
+// same goes for the 3 Pro's widget bodies: 0x5c with 24 zero bytes is eight empty tags, and the
+// document, which keeps those bodies as hex, dropped it on save.
+const LEAF = new Set<number>([
+  TAG.bind,
+  TAG.fmt,
+  TAG.frame,
+  TAG.arc,
+  TAG.arcClipped,
+  TAG.slot,
+  TAG.proc,
+  TAG.body83,
+  TAG.body84,
+  TAG.body89,
+]);
 
 function allZero(b: Uint8Array): boolean {
   for (const c of b) if (c !== 0) return false;
@@ -227,8 +240,9 @@ export function parseBin(buf: ArrayBuffer | Uint8Array): Face {
     off += 8 + size;
   }
   const screens = rawTree.map((n) => nodeToJSON(n, resources, resOffset, TAG.root));
+  const untitled = !screens.some((s) => s.subs?.some((n) => n.tag === TAG.name));
 
-  return { name, nameRaw, screens, resources };
+  return { name, nameRaw, ...(untitled ? { untitled } : {}), screens, resources };
 }
 
 // ---- .bin assembly ----

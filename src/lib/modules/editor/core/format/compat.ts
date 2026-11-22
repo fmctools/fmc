@@ -29,7 +29,6 @@ export const PRO2_TESTED_BYTES = 1_955_000;
 
 const HDR = 36;
 const PROC = 0x82;
-const PROC_BODY = 0x5c;
 const PRO2_LAST = 3;
 const PRO3_LAST = 7;
 
@@ -55,7 +54,7 @@ export function procWidgets(d: Uint8Array): ProcWidget[] {
       const p = body + i;
       const n = u16(d, p + 1);
 
-      if (d[p] === PROC_BODY && len - i >= n + 3) {
+      if (d[p] === TAG.proc && len - i >= n + 3) {
         // body+0 is the struct: its list sits at +0x15 of the node, inside it or past its end
         const list = d[body + 0x15];
         const count = d[body + 0x16];

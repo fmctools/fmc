@@ -286,6 +286,8 @@ export interface Screen {
 export interface Doc {
   readonly name: string;
   readonly nameRaw: string;
+  /** The name of a file that had no 0x86 title: none is written until the face is renamed. */
+  readonly untitledAs?: string;
   readonly screens: readonly Screen[];
   /** Insertion-ordered: `toLegacy` walks it to rebuild the resource table. */
   readonly images: ReadonlyMap<ImageId, ImageAsset>;
@@ -468,7 +470,13 @@ export function fromLegacy(face: LegacyFace): { doc: Doc; assets: Resource[] } {
   const titled = face.screens.flatMap((s) => s.subs ?? []).find((c) => c.tag === TAG.name)?.text;
 
   return {
-    doc: { name: titled || face.name, nameRaw: face.nameRaw ?? "", screens, images },
+    doc: {
+      name: titled || face.name,
+      nameRaw: face.nameRaw ?? "",
+      ...(face.untitled ? { untitledAs: face.name } : {}),
+      screens,
+      images,
+    },
     assets: face.resources,
   };
 }
@@ -626,7 +634,10 @@ export function toLegacy(doc: Doc): LegacyFace {
 
     return {
       tag: s.kind === "aod" ? TAG.aod : TAG.main,
-      subs: s.kind === "main" ? [{ tag: TAG.name, text: doc.name.slice(0, 63) }, ...subs] : subs,
+      subs:
+        s.kind === "main" && doc.name !== doc.untitledAs
+          ? [{ tag: TAG.name, text: doc.name.slice(0, 63) }, ...subs]
+          : subs,
     };
   });
 

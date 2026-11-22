@@ -47,6 +47,8 @@ export interface FaceNode {
 export interface Face {
   name: string;
   nameRaw?: string;
+  /** Read from a file with no 0x86 title node (two stock faces have none). */
+  untitled?: boolean;
   screens: FaceNode[];
   resources: Resource[];
 }
@@ -73,6 +75,11 @@ export const TAG = {
   arcClipped: 0x5b,
   /** A widget slot's body: index, the metrics it offers, and the active one. */
   slot: 0x5f,
+  /** The bodies of the Watch 3 Pro's own widgets: under 0x82 (procedural), 0x83, 0x84, 0x89. */
+  proc: 0x5c,
+  body83: 0x5d,
+  body84: 0x5e,
+  body89: 0x63,
 } as const;
 
 // 0x0a/0x0e were swapped until this fix — confirmed by comparing hand geometry in
