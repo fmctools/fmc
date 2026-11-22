@@ -111,6 +111,7 @@
     newFaceRequested,
     importFacerRequested,
     exportBin,
+    exportPro2,
     errored,
     watchPressed,
     watchReleased,
@@ -585,6 +586,12 @@
             <Icon name="download" />
             {$t.exportBin}
           </MenuItem>
+          {#if $support === "pro2Converts"}
+            <MenuItem onClick={() => exportPro2()}>
+              <Icon name="download" />
+              {$t.exportPro2}
+            </MenuItem>
+          {/if}
         {/if}
       </Menu>
       <input bind:this={fileInput} type="file" accept=".bin,.aab,.zip" hidden onchange={openFile} />

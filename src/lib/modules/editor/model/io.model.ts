@@ -3,7 +3,15 @@
 // (flushAssets), so everything the editor did to the pixels stays non-destructive until export.
 import { attach, combine, createEffect, createEvent, createStore, sample } from "effector";
 import { reset } from "patronum";
-import { buildBin, parseBin } from "../core/format";
+import {
+  assertFlashable,
+  assertWatchCompat,
+  buildBin,
+  parseBin,
+  PRO2_TESTED_BYTES,
+} from "../core/format";
+import { forPro2, pro2Problem } from "../core/document/pro2";
+import { usesTheme } from "../core/document/support";
 import { fromLegacy, toLegacy, type Doc, type ImageId } from "../core/document/doc";
 import { saveNames, withNames } from "../core/document/names";
 import { previewSim } from "../core/document/sources";
@@ -32,6 +40,8 @@ export const faceKeySet = createEvent<string | null>();
 export const newFaceRequested = createEvent<string | void>();
 export const importFacerRequested = createEvent<File[]>();
 export const exportBin = createEvent();
+/** Download a copy converted for a Watch Pro 2 (core/document/pro2.ts). */
+export const exportPro2 = createEvent();
 /** Fired on any successful load — pages that need to react (navigate once the face is ready)
  *  subscribe, others ignore it. */
 export const loadDone = createEvent<{ doc: Doc; label: string }>();
@@ -177,16 +187,41 @@ export const previewThumb = attach({
   },
 });
 
+function download(bin: Uint8Array, name: string) {
+  const a = document.createElement("a");
+
+  a.href = URL.createObjectURL(new Blob([bin as BlobPart]));
+  a.download = name;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 const exportBinFx = attach({
   source: { doc: $doc, cache: $cache, sim: $sim, dirty: $dirty },
   async effect(s) {
-    const out = await binOf(s);
-    const a = document.createElement("a");
+    download(await binOf(s), `${s.doc!.name || "watchface"}.bin`);
+  },
+});
 
-    a.href = URL.createObjectURL(new Blob([out as BlobPart]));
-    a.download = `${s.doc!.name || "watchface"}.bin`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+const exportPro2Fx = attach({
+  source: { doc: $doc, cache: $cache, sim: $sim, dirty: $dirty, t },
+  async effect({ t, ...s }) {
+    const problem = pro2Problem(s.doc!);
+
+    if (problem?.reason === "tooHeavy")
+      throw new Error(
+        t.pro2TooHeavy((problem.bytes / 1e6).toFixed(1), (PRO2_TESTED_BYTES / 1e6).toFixed(2)),
+      );
+    if (problem?.reason === "theme") throw new Error(t.pro2Theme);
+    if (problem) throw new Error(t.support[problem.reason]);
+    // a pinned theme changes what the face shows, so its thumbnails are baked again
+    const bin = await binOf({ ...s, dirty: s.dirty || usesTheme(s.doc!) });
+    const out = buildBin(toLegacy(forPro2(fromLegacy(parseBin(bin)).doc, s.sim.theme)));
+
+    // the gates an install runs, as a Watch Pro 2 on stock firmware
+    assertFlashable(out, "watch_pro_2");
+    await assertWatchCompat(out, "watch_pro_2", async () => null);
+    download(out, `${s.doc!.name || "watchface"}-watch-pro-2.bin`);
   },
 });
 
@@ -246,6 +281,12 @@ sample({
   filter: Boolean,
   target: exportBinFx,
 });
+sample({
+  clock: exportPro2,
+  source: $doc,
+  filter: Boolean,
+  target: exportPro2Fx,
+});
 
 sample({
   clock: loadBufferFx.fail,
@@ -257,6 +298,7 @@ sample({
     newFaceFx.failData,
     importFacerFx.failData,
     exportBinFx.failData,
+    exportPro2Fx.failData,
     buildCurrentBin.failData,
   ],
   fn: (e: Error) => e.message,
