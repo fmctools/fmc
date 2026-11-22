@@ -1,6 +1,7 @@
 <script lang="ts">
   import { PanelSection } from "$lib/shared/components/panel-section";
   import { Input } from "$lib/shared/components/input";
+  import { Select } from "$lib/shared/components/select";
   import { Switch } from "$lib/shared/components/switch";
   import { Icon } from "$lib/shared/components/icon";
   import {
@@ -9,6 +10,7 @@
     METRIC_GOAL,
     SLEEP_IDS,
     SUN_IDS,
+    THEMES,
     type Sim,
     type SimMetric,
   } from "../core/document/sources";
@@ -30,6 +32,7 @@
     "temp",
     "aqi",
     "spo2",
+    "stress",
     "stands",
     "exerciseMin",
     "activeHours",
@@ -103,6 +106,19 @@
         >{$t.slotPlaceholders}</button
       >
     </div>
+    {#if $ids.some(({ id }) => id === 0x99)}
+      <div>
+        <span class="type-label muted-label">{$t.theme}</span>
+        <Select
+          value={String($sim.theme)}
+          options={Array.from({ length: THEMES }, (_, i) => ({
+            value: String(i),
+            label: String(i),
+          }))}
+          onChange={(v) => simPatched({ theme: Number(v) })}
+        />
+      </div>
+    {/if}
     <div>
       <span class="type-label muted-label">{$common.accentColor}</span>
       <!-- the watch offers a fixed set, so this mirrors it rather than opening a color wheel;

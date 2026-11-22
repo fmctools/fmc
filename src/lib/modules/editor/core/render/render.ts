@@ -32,6 +32,8 @@ import {
 } from "./canvas";
 import { FULL_BLEED_R, drawProceduralArc, drawSector, hexRGB, progressFrac } from "./arc";
 import { CENTER, SCREEN } from "./screen";
+import { procOf } from "../document/proc";
+import { drawProc } from "./proc";
 
 /** One layer drawn at a scale or angle it doesn't have yet — what a corner or rotate drag shows
  *  while it lasts. Re-baking the assets per pointermove costs a decode per frame; this costs a
@@ -131,11 +133,20 @@ function drawPlain(env: Env, l: Layer, place: Place = {}): Size | null {
   if (l.kind === "raw") return null; // preview/name nodes aren't drawn
 
   const frames = framesOf(l);
+  const proc = procOf(l);
 
-  if (!frames.length && l.kind !== "ring") return null;
+  if (!frames.length && l.kind !== "ring" && !proc) return null;
   const { offset = ORIGIN, origin } = place;
   const x = origin ? origin.x : offset.x + l.x;
   const y = origin ? origin.y : offset.y + l.y;
+
+  if (proc) {
+    const box = drawProc(env.ctx, proc, x, y, env.sim, env.t, (i) => bmpOf(env.store, frames[i]));
+
+    if (box && env.ctx) env.hits?.push({ layer: l, ...box });
+    // a group lays the widget out by its own box (the meta's), a click hits only what it drew
+    return { w: l.meta.w, h: l.meta.h };
+  }
 
   if (l.kind === "hand") return drawHand(env, l, frames, x, y);
   if (l.kind === "ring") return drawRing(env, l, frames, x, y);

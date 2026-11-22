@@ -2,6 +2,7 @@
 // instead. A source id is meta[9] of a struct (see docs/cmf-protocol.md §9.6a), the id of a
 // visibility condition, and an entry of a widget slot's metric menu.
 import { hex, unhex, type FaceNode } from "../format";
+import { procSources } from "./proc";
 import type { Condition, Doc, Layer } from "./doc";
 
 // "?" = guess, not confirmed.
@@ -106,12 +107,17 @@ export const ID_LABELS: Record<number, string> = {
   0x86: "sunset hour",
   0x87: "sunset min",
   0x8b: "aqi",
+  // both watches have it, next to the AQI (cmf-watch-sdk docs/recon.md, "Data sources")
+  0x8c: "stress",
+  // the Watch 3 Pro's alone: the minutes of last night's sleep (0x101D2CD2), and the number of the face's colour theme (Eleginn picks its dial by it)
+  0x93: "sleep min (3 Pro)",
+  0x99: "color theme",
 };
 
 /** Every source that reads sunrise/sunset: the four times, then daylight/night %. */
 export const SUN_IDS = [0x84, 0x85, 0x86, 0x87, 0x82, 0x83];
 /** Sleep: the hours/minutes pair and the ring gauging the same duration. */
-export const SLEEP_IDS = [0x42, 0x43, 0x46];
+export const SLEEP_IDS = [0x42, 0x43, 0x46, 0x93];
 
 // Value-indexed frame sets: the firmware picks images[value % count], so frame order is part
 // of the format. What each index MUST hold, for the sources where the value isn't the frame's
@@ -186,6 +192,7 @@ export interface Sim {
   distance: SimValue;
   aqi: SimValue;
   spo2: SimValue; // blood oxygen, % (0x1b)
+  stress: SimValue; // 0..100 (0x8c)
   stands: SimValue; // hours stood (0x48) — see ID_LABELS/idValue note, corrected from "calories"
   exerciseMin: SimValue; // minutes of exercise today (0x6a), the firmware's act_strength_time
   activeHours: SimValue; // hours with >= 100 steps today (0x6d)
@@ -210,6 +217,13 @@ export interface Sim {
   // color" in docs/cmf-protocol.md); null = draw the baked default. Applied async in
   // editor.model.ts's accentFx.
   accentColor: string | null;
+  /** The colour theme's number, which source 0x99 answers (0..THEMES - 1). */
+  theme: number;
+  /** The finger on the preview, for the widget that lights a ring under it (type 4). */
+  touch: { x: number; y: number } | null;
+  /** The clip a tap started and when (type 5); no time = none played since it came to rest. */
+  clip: number;
+  clipAt: number | null;
   // widget-slot (0x85) imgs[0] is an on-watch "tap to configure" placeholder — the real
   // device only draws it in its own edit mode, never during normal time-telling, so the
   // live sim skips it by default. This is an editor-only preview toggle, not real data.
@@ -256,6 +270,7 @@ export function defaultSim(): Sim {
     temp: 25,
     aqi: 42,
     spo2: 98,
+    stress: 35,
     stands: 5,
     exerciseMin: 18,
     activeHours: 7,
@@ -271,9 +286,16 @@ export function defaultSim(): Sim {
     sleepGoal: 8 * 60,
     overrides: {}, // id -> number, manual override of any source
     accentColor: null,
+    theme: 0,
+    touch: null,
+    clip: 0,
+    clipAt: null,
     showSlotPlaceholders: false,
   };
 }
+
+/** How many colours a Watch 3 Pro's theme picks from (1.0.1.77, 0x10235316). */
+export const THEMES = 7;
 
 export const PREVIEW_TIME = new Date(2026, 0, 8, 10, 9, 36).getTime();
 
@@ -283,6 +305,9 @@ export const previewSim = (sim: Sim): Sim => ({
   time: PREVIEW_TIME,
   is24h: true,
   showSlotPlaceholders: false,
+  touch: null,
+  clip: 0,
+  clipAt: null,
   overrides: {},
 });
 
@@ -310,6 +335,7 @@ export type SimMetric =
   | "temp"
   | "aqi"
   | "spo2"
+  | "stress"
   | "stands"
   | "exerciseMin"
   | "activeHours";
@@ -342,6 +368,7 @@ export const ID_METRIC: Record<number, SimMetric> = {
   0x60: "temp",
   0x61: "temp",
   0x8b: "aqi",
+  0x8c: "stress",
   0x22: "distance", // derived below: km/mi, integer and fraction
   0x23: "distance",
   0x74: "distance",
@@ -473,9 +500,12 @@ export function idValue(id: number, sim: Sim, t: TimeParts): number {
     case 0x42:
       return Math.floor(sim.sleep / 60);
     case 0x43:
+    case 0x93:
       return sim.sleep % 60;
     case 0x46:
       return sim.sleep;
+    case 0x99:
+      return sim.theme;
     case 0x6b:
       return Number(sim.exerciseGoal);
     case 0x6e:
@@ -655,6 +685,7 @@ export function collectIdsDoc(doc: Doc): { id: number; max: number }[] {
     for (const l of ls) {
       if (l.kind !== "group" && l.kind !== "raw" && l.meta.source)
         ids.set(l.meta.source, l.meta.max || ids.get(l.meta.source) || 0);
+      for (const id of procSources(l)) ids.set(id, ids.get(id) || 0);
       for (const c of l.conditions) if (c.source) ids.set(c.source, ids.get(c.source) || 0);
       if (l.kind === "group") walk(l.children);
       if (l.kind === "raw" && l.children) walk(l.children);

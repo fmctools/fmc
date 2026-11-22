@@ -93,6 +93,7 @@ export function faceBin(
         subs: [...(title ? [{ tag: TAG.name, text: header }] : []), ...layers, preview],
       },
     ],
-    resources: [...resources, ...squares(1, 4)],
+    // the size of a real thumbnail: a smaller one loses a panel's thin glyphs
+    resources: [...resources, ...squares(1, 4, 270, 270)],
   });
 }

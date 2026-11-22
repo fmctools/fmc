@@ -111,6 +111,9 @@
     importFacerRequested,
     exportBin,
     errored,
+    watchPressed,
+    watchReleased,
+    watchTapped,
     renameFace,
     buildCurrentBin,
     previewBlob,
@@ -339,6 +342,7 @@
 
   // ---- selection and drag ----
   let drag: { p: Point; items: DragItem[]; moved: boolean } | null = null;
+  let pressed = false; // a press that is still a tap on the watch being previewed
   const canvasXY = (e: PointerEvent): Point => {
     const r = canvas!.getBoundingClientRect();
 
@@ -366,6 +370,10 @@
       canvas?.setPointerCapture(e.pointerId);
       return;
     }
+    // the dial takes the press too: some Watch 3 Pro widgets answer one
+    pressed = true;
+    watchPressed(p);
+    canvas?.setPointerCapture(e.pointerId); // the release must come back here
     const h = hits.findLast(
       (h) => !h.layer.locked && p.x >= h.x && p.x < h.x + h.w && p.y >= h.y && p.y < h.y + h.h,
     );
@@ -392,7 +400,6 @@
       // the canvas doesn't resize mid-drag, so one layout read is enough for the whole gesture
       cvScale = SCREEN / (canvas?.getBoundingClientRect().width || SCREEN);
     }
-    canvas?.setPointerCapture(e.pointerId);
   }
 
   function onMove(e: PointerEvent) {
@@ -415,6 +422,8 @@
     if (!d.moved) {
       checkpoint(0);
       d.moved = true;
+      pressed = false; // it's a drag
+      watchReleased();
     }
     const snap =
       box0 && snapT && !e.altKey
@@ -426,6 +435,9 @@
     for (const it of d.items) layerPatched(movePatch(it, it.x0 + m.dx, it.y0 + m.dy));
   }
   function onUp() {
+    watchReleased();
+    if (pressed) watchTapped(Date.now());
+    pressed = false;
     if (rot) {
       if (rot.started && rot.deg % 360) rotateImageRequested({ layer: rot.layer.id, deg: rot.deg });
       rot = null;
@@ -699,6 +711,10 @@
                 onpointerdown={onDown}
                 onpointermove={onMove}
                 onpointerup={onUp}
+                onpointercancel={() => {
+                  pressed = false;
+                  watchReleased();
+                }}
               ></canvas>
               <!-- the market opens the editor before the .bin has even arrived (see editRequested) —
                this is what the user watches while it does -->
