@@ -87,6 +87,46 @@ export function screenMemory(screen: FaceNode, resources: Resource[]): ScreenMem
   };
 }
 
+/** The colour formats decodedBytes knows. */
+const MEASURED = new Set([1, 4, 5, 13, 14, 24, 28]);
+/** The tags that hold layers in every face of the catalog and both factory corpora. */
+const CONTAINERS = new Set<number>([
+  TAG.main,
+  TAG.aod,
+  TAG.image,
+  0x38,
+  TAG.number,
+  TAG.group,
+  TAG.hand,
+  0x80,
+  0x81,
+  0x82,
+  0x83,
+  0x84,
+  0x85,
+  0x89,
+]);
+
+/**
+ * Whether screenBytes sees everything the face shows. Whatever the parser couldn't follow counts
+ * as zero there, so a face with any of it has no known size: a screen or a container that didn't
+ * parse into layers, an image reference that leads to no resource (kept as `tail`; all zeroes
+ * is no image), an image in a format decodedBytes doesn't know.
+ * ponytail: containers are a list, so one with a tag not seen yet could still hide images — add
+ * the tag here when a corpus turns one up.
+ */
+export function measurable({ screens, resources }: Face): boolean {
+  const ok = (n: FaceNode, top: boolean): boolean => {
+    if (n.tag === TAG.preview) return true;
+    if (n.images) return n.images.every((i) => MEASURED.has(resources[i].cf));
+    if (n.tag === TAG.struct && (n.hex || /[^0]/.test(n.tail ?? ""))) return false;
+    if (n.hex && (top || CONTAINERS.has(n.tag))) return false;
+    return n.subs?.every((s) => ok(s, false)) ?? true;
+  };
+
+  return screens.every((s) => ok(s, true));
+}
+
 /** The screens of a face that a Watch 3 Pro can't hold, with what each needs. */
 export const overBudget = (face: Face) =>
   face.screens

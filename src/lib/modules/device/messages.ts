@@ -59,6 +59,10 @@ const en = {
     `the watch refused to replace “${name}” — flash again and pick a different dial to replace`,
   aodNoPreview:
     "the always-on screen has no preview thumbnail, and the watch can crash in a loop on it. Open the face in the editor and flash it from there — the editor puts the thumbnail back.",
+  unreadableFace:
+    "FMC can't read this file, so it can't check that the watch will survive it. Nothing was sent to the watch.",
+  unmeasurableFace:
+    "FMC can't measure how much memory this face needs, and too much makes a Watch 3 Pro restart in a loop. Nothing was sent to the watch.",
   imageOverLimit: (w: string, h: string, max: string) =>
     `an image is ${w}×${h} px, over the ${max} px limit — the watch can run out of memory loading it and restart in a loop. Resize it in the editor first.`,
   screenOverBudget: (aod: boolean, need: string, max: string) =>
@@ -161,6 +165,10 @@ export const bt = dict(en, {
       `часы отказались заменить «${name}» — загрузите ещё раз и выберите другой циферблат для замены`,
     aodNoPreview:
       "у экрана always-on нет миниатюры, и часы могут на нём зациклиться на перезагрузке. Откройте циферблат в редакторе и загрузите оттуда — редактор вернёт миниатюру.",
+    unreadableFace:
+      "FMC не может прочитать этот файл и проверить, безопасен ли он для часов. На часы ничего не отправлено.",
+    unmeasurableFace:
+      "FMC не может посчитать, сколько памяти нужно этому циферблату, а от нехватки памяти Watch 3 Pro зацикливается на перезагрузке. На часы ничего не отправлено.",
     imageOverLimit: (w, h, max) =>
       `изображение ${w}×${h} px больше предела в ${max} px — часам может не хватить памяти, и они зациклятся на перезагрузке. Сначала уменьшите его в редакторе.`,
     screenOverBudget: (aod, need, max) =>
@@ -258,6 +266,10 @@ export const bt = dict(en, {
       `годинник відмовився замінити «${name}» — завантажте ще раз і виберіть інший циферблат для заміни`,
     aodNoPreview:
       "екран always-on не має мініатюри, і годинник може циклічно перезавантажуватися на ньому. Відкрийте циферблат у редакторі й завантажте звідти — редактор поверне мініатюру.",
+    unreadableFace:
+      "FMC не може прочитати цей файл і перевірити, чи безпечний він для годинника. На годинник нічого не надіслано.",
+    unmeasurableFace:
+      "FMC не може порахувати, скільки пам’яті потрібно цьому циферблату, а через брак пам’яті Watch 3 Pro циклічно перезавантажується. На годинник нічого не надіслано.",
     imageOverLimit: (w, h, max) =>
       `зображення ${w}×${h} px перевищує межу ${max} px — годиннику може забракнути пам'яті, і він циклічно перезавантажуватиметься. Спершу зменште його в редакторі.`,
     screenOverBudget: (aod, need, max) =>
@@ -355,6 +367,10 @@ export const bt = dict(en, {
       `el reloj se negó a reemplazar «${name}» — vuelve a enviarla y elige otra esfera para reemplazar`,
     aodNoPreview:
       "la pantalla siempre activa no tiene miniatura, y el reloj puede quedarse reiniciándose en bucle con ella. Abre la esfera en el editor y envíala desde allí — el editor repone la miniatura.",
+    unreadableFace:
+      "FMC no puede leer este archivo ni comprobar que sea seguro para el reloj. No se envió nada al reloj.",
+    unmeasurableFace:
+      "FMC no puede calcular cuánta memoria necesita esta esfera y, si le falta memoria, el Watch 3 Pro se reinicia en bucle. No se envió nada al reloj.",
     imageOverLimit: (w, h, max) =>
       `una imagen mide ${w}×${h} px, más del límite de ${max} px — el reloj puede quedarse sin memoria al cargarla y reiniciarse en bucle. Redúcela primero en el editor.`,
     screenOverBudget: (aod, need, max) =>
@@ -454,6 +470,10 @@ export const bt = dict(en, {
       `घड़ी ने “${name}” को बदलने से मना किया — फिर से भेजें और बदलने के लिए दूसरा फ़ेस चुनें`,
     aodNoPreview:
       "ऑलवेज़-ऑन स्क्रीन का थंबनेल नहीं है, और घड़ी उस पर बार-बार रीस्टार्ट हो सकती है। फ़ेस को एडिटर में खोलें और वहीं से भेजें — एडिटर थंबनेल वापस जोड़ देता है।",
+    unreadableFace:
+      "FMC इस फ़ाइल को पढ़ नहीं सकता, इसलिए यह जाँच नहीं सकता कि यह घड़ी के लिए सुरक्षित है। घड़ी पर कुछ नहीं भेजा गया।",
+    unmeasurableFace:
+      "FMC यह नहीं माप सकता कि इस फ़ेस को कितनी मेमोरी चाहिए, और मेमोरी कम पड़ने पर Watch 3 Pro बार-बार रीस्टार्ट होती है। घड़ी पर कुछ नहीं भेजा गया।",
     imageOverLimit: (w, h, max) =>
       `एक इमेज ${w}×${h} px की है, ${max} px की सीमा से बड़ी — घड़ी की मेमोरी खत्म हो सकती है और वह बार-बार रीस्टार्ट हो सकती है। पहले एडिटर में इसे छोटा करें।`,
     screenOverBudget: (aod, need, max) =>
@@ -558,6 +578,8 @@ const RULES: Rule[] = [
   [/^the watch refused to replace “(.+)” — /, (w, m) => w.refusedReplace(m[1])],
   [/^dial delete failed \((.+)\)$/, (w, m) => w.deleteFailed(m[1])],
   lit("aodNoPreview"),
+  lit("unreadableFace"),
+  lit("unmeasurableFace"),
   [
     /^an image is (\d+)×(\d+) px, over the (\d+) px limit/,
     (w, m) => w.imageOverLimit(m[1], m[2], m[3]),

@@ -4,7 +4,7 @@
 
 import type { Face, FaceNode, Resource } from "./raw";
 import { TAG, handKinds, hex, i16, u16, u32, unhex } from "./raw";
-import { overBudget, SCREEN_BUDGET } from "./budget";
+import { measurable, overBudget, SCREEN_BUDGET } from "./budget";
 
 interface TLVNode {
   tag: number;
@@ -410,8 +410,9 @@ const largest = (resources: Resource[], side: number) =>
 
 /** Throws when the file holds something the watch may not survive: an image too big to load, a
  *  screen past a Watch 3 Pro's memory (`device` is the watch it goes to, devices.ts), or an
- *  always-on screen without its thumbnail. A file we can't parse isn't blocked here — the watch's
- *  installer still gets to refuse it. Run fitForWatch first: it shrinks what it can. */
+ *  always-on screen without its thumbnail. It fails closed: a file we can't parse goes to no
+ *  watch, and one we can't measure doesn't go to a Watch 3 Pro — the watch's installer takes
+ *  faces that then boot-loop it. Run fitForWatch first: it shrinks what it can. */
 export function assertFlashable(bin: Uint8Array, device: string | null = null): void {
   let face: Face, resources: Resource[], screens: FaceNode[];
 
@@ -419,7 +420,9 @@ export function assertFlashable(bin: Uint8Array, device: string | null = null): 
     face = parseBin(bin);
     ({ resources, screens } = face);
   } catch {
-    return;
+    throw new Error(
+      "FMC can't read this file, so it can't check that the watch will survive it. Nothing was sent to the watch.",
+    );
   }
   // all 223 stock AOD screens (Pro 2 and Pro 3) carry a 0x28 thumbnail, and the FMC face that
   // crash-looped a Watch 3 Pro on AOD was the one whose AOD screen had none (#49). ponytail: the
@@ -437,6 +440,10 @@ export function assertFlashable(bin: Uint8Array, device: string | null = null): 
   if (big)
     throw new Error(
       `an image is ${big.w}×${big.h} px, over the ${MAX_IMAGE_SIDE} px limit — the watch can run out of memory loading it and restart in a loop. Resize it in the editor first.`,
+    );
+  if (device === "watch_3_pro" && !measurable(face))
+    throw new Error(
+      "FMC can't measure how much memory this face needs, and too much makes a Watch 3 Pro restart in a loop. Nothing was sent to the watch.",
     );
   const heavy = device === "watch_3_pro" ? overBudget(face)[0] : undefined;
 

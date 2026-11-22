@@ -3,6 +3,7 @@
 import { test, expect, vi } from "vitest";
 import { bleModel } from "$lib/modules/device/model";
 import "$lib/modules/analytics/model";
+import url from "./__fixtures__/Analog__287__Simple_Dial.bin?url";
 
 const sent = vi.hoisted((): [string, unknown][] => []);
 
@@ -31,7 +32,10 @@ vi.mock("$lib/modules/device/lib/ble", async (importOriginal) => {
 test("a flash cut off by a disconnect still names the watch it was going to", async () => {
   bleModel.connectRequested();
   await vi.waitFor(() => expect(bleModel.$bleInfo.getState()).not.toBeNull());
-  bleModel.flashRequested({ bin: new Uint8Array() });
+  // a face the gate lets through: one it refuses never gets as far as the link
+  const bin = new Uint8Array(await (await fetch(url)).arrayBuffer());
+
+  bleModel.flashRequested({ bin });
   // the file goes through a worker first (fitForWatchOffThread), which a loaded run starts slowly
   await vi.waitFor(() => expect(sent).toHaveLength(2), { timeout: 5000 });
 
