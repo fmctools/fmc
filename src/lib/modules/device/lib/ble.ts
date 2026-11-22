@@ -1045,7 +1045,7 @@ export class Watch {
     state: Wp2State,
     onProgress: (pct: number) => void = () => {},
   ) {
-    const { pkg, slot } = planInstall(data, state, crc32);
+    const { pkg, slot, body } = planInstall(data, state, crc32);
     const call = async (req: number, rep: number, payload: Uint8Array) => {
       await this.send(req, payload);
       const r = await this.waitFor(rep, 8000);
@@ -1065,13 +1065,13 @@ export class Watch {
       hv = new DataView(head.buffer);
 
     head[0] = slot;
-    hv.setUint32(1, data.length, true);
-    hv.setUint32(5, crc32(data), true);
+    hv.setUint32(1, body.length, true);
+    hv.setUint32(5, crc32(body), true);
     this.status(`installing ${pkg.name}…`);
     dbg("install", pkg.name, "v" + pkg.version, "slot", slot === LOADER_SLOT ? "L" : slot);
     await call(CMD.stubBegin, CMD.stubBeginRep, head);
-    for (let off = 0; off < data.length; off += MAX_DATA) {
-      const part = data.subarray(off, off + MAX_DATA);
+    for (let off = 0; off < body.length; off += MAX_DATA) {
+      const part = body.subarray(off, off + MAX_DATA);
       const req = new Uint8Array(4 + part.length);
 
       new DataView(req.buffer).setUint32(0, off, true);
@@ -1081,7 +1081,7 @@ export class Watch {
 
       if (written !== off + part.length)
         throw new Error(`the watch has ${written} bytes, expected ${off + part.length}`);
-      onProgress(Math.min(99, Math.floor(((off + part.length) / data.length) * 100)));
+      onProgress(Math.min(99, Math.floor(((off + part.length) / body.length) * 100)));
     }
     // the stub's decrypt returns nothing for an empty plaintext, so END carries one dummy byte
     await call(CMD.stubEnd, CMD.stubEndRep, new Uint8Array([0]));

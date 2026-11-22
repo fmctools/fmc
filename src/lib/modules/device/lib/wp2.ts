@@ -89,12 +89,33 @@ const LOADER_SIZE = 0x1_0000;
 const APP_SIZE = 0x2_0000;
 // stub 1 doesn't say which abi_minor it takes; every stub on a watch so far takes 3
 const DEFAULT_ABI_MINOR = 3;
+// Widget icons (cmf-watch-sdk docs/app-icons.md): an optional trailer after the relocation table,
+// outside the header's sizes and body CRC — "WP2W", version 1, count 1..16, size 40, 0, crc32 of the
+// pixels, count × 40·40·3 bytes. Stubs before 10 refuse any byte past the relocations.
+const STUB_TRAILER = 10;
+const ICON_BYTES = 40 * 40 * 3;
+
+function trailerOk(t: Uint8Array, crc32: (d: Uint8Array) => number) {
+  if (t.length < 12 || new TextDecoder().decode(t.subarray(0, 4)) !== "WP2W") return false;
+  const [version, count, side, zero] = t.subarray(4, 8);
+
+  return (
+    version === 1 &&
+    count >= 1 &&
+    count <= 16 &&
+    side === 40 &&
+    zero === 0 &&
+    t.length === 12 + count * ICON_BYTES &&
+    crc32(t.subarray(12)) === new DataView(t.buffer, t.byteOffset + 8, 4).getUint32(0, true)
+  );
+}
 
 /**
  * The stub's own checks (wp2-core pkg.rs: parse_header, check_slot, the body CRC), run before a
  * byte goes out so a package that would be refused at the end isn't sent first. Returns the slot
  * it goes to: L for a loader, else the slot that already holds an app of that name (an update
- * replaces it), else the first free one.
+ * replaces it), else the first free one — and `body`, what goes out: the package whole, or for a
+ * stub before 10 without its widget icon trailer.
  */
 export function planInstall(data: Uint8Array, state: Wp2State, crc32: (d: Uint8Array) => number) {
   const fail = (why: string) => {
@@ -115,8 +136,13 @@ export function planInstall(data: Uint8Array, state: Wp2State, crc32: (d: Uint8A
   const relocs = dv.getUint32(44, true);
 
   if (pkg.size > (pkg.kind === 1 ? LOADER_SIZE : APP_SIZE)) fail("too big for its slot");
-  if (data.length !== HEADER_SIZE + pkg.size + 4 * relocs) fail("truncated or padded");
-  if (crc32(data.subarray(HEADER_SIZE)) !== pkg.crc) fail("body checksum");
+  const end = HEADER_SIZE + pkg.size + 4 * relocs;
+
+  if (data.length < end) fail("truncated or padded");
+  if (data.length > end && !trailerOk(data.subarray(end), crc32))
+    fail("broken widget icon trailer");
+  if (crc32(data.subarray(HEADER_SIZE, end)) !== pkg.crc) fail("body checksum");
+  const body = state.stub.version < STUB_TRAILER ? data.subarray(0, end) : data;
 
   let slot: number;
 
@@ -129,5 +155,5 @@ export function planInstall(data: Uint8Array, state: Wp2State, crc32: (d: Uint8A
     else if (free !== undefined) slot = free;
     else throw new Error(`all ${APP_SLOTS} app slots are taken — remove an app on the watch first`);
   } else throw new Error("can't install this package: unknown kind");
-  return { pkg, slot: slot! };
+  return { pkg, slot: slot!, body };
 }

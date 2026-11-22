@@ -13,6 +13,15 @@ import {
   STUB_SLOT,
   type Wp2State,
 } from "$lib/modules/device/lib/wp2";
+// built by cmf-watch-sdk (widget-templates) package.pack: an app with 2 widget icons, and the same
+// app packed without them — what package.strip_trailer makes of the first
+import iconsUrl from "./__fixtures__/icons.wp2app?url";
+import strippedUrl from "./__fixtures__/icons-stripped.wp2app?url";
+
+const load = (url: string) =>
+  fetch(url)
+    .then((r) => r.arrayBuffer())
+    .then((b) => new Uint8Array(b));
 
 // a .wp2app header as wp2apps `pack` writes it (<4sHBB24sIIIIII8s)
 function header(name: string, version: number, crc: number, kind = 0) {
@@ -123,8 +132,12 @@ function pack(name: string, size: number, kind = 0, abiMinor = 3) {
   out.set(body, 64);
   return out;
 }
-const state = (apps: Record<number, string>, abiMinor: number | null = 3): Wp2State => ({
-  stub: { version: 2, abiMinor },
+const state = (
+  apps: Record<number, string>,
+  abiMinor: number | null = 3,
+  version = 2,
+): Wp2State => ({
+  stub: { version, abiMinor },
   loader: null,
   apps: Object.fromEntries(
     Object.entries(apps).map(([slot, name]) => [slot, parsePackageHeader(pack(name, 64))!]),
@@ -172,6 +185,72 @@ test.each([
   ["a truncated file", pack("x", 64).subarray(0, 100), state({}), /truncated/],
 ] as const)("refuses %s before sending anything", (_, data, st, why) => {
   expect(() => planInstall(data, st, crc32)).toThrow(why);
+});
+
+test("widget icons go whole to stub 10 and later, cut off for an older stub", async () => {
+  const [icons, stripped] = await Promise.all([load(iconsUrl), load(strippedUrl)]);
+
+  expect(planInstall(icons, state({}, 3, 10), crc32).body).toEqual(icons);
+  expect(planInstall(icons, state({}, 3, 9), crc32).body).toEqual(stripped);
+  expect(planInstall(icons, state({}, null, 1), crc32).body).toEqual(stripped);
+  expect(planInstall(stripped, state({}, 3, 9), crc32).body).toEqual(stripped);
+});
+
+test.each([
+  ["a bad magic", 0, 0x20],
+  ["an unknown version", 4, 1],
+  ["no icons", 5, -2],
+  ["17 icons", 5, 15],
+  ["another icon size", 6, 1],
+  ["a nonzero pad", 7, 1],
+  ["a bad CRC", 12, 1],
+] as const)("refuses a widget icon trailer with %s", async (_, at, delta) => {
+  const icons = await load(iconsUrl);
+  const stripped = await load(strippedUrl);
+  const bad = icons.slice();
+
+  bad[stripped.length + at] += delta;
+  for (const version of [9, 10])
+    expect(() => planInstall(bad, state({}, 3, version), crc32)).toThrow(
+      /broken widget icon trailer/,
+    );
+});
+
+test("refuses a widget icon trailer that is cut short or runs long", async () => {
+  const icons = await load(iconsUrl);
+  const stripped = await load(strippedUrl);
+  const long = new Uint8Array(icons.length + 1);
+
+  long.set(icons);
+  for (const bad of [icons.subarray(0, -1), long, icons.subarray(0, stripped.length + 5)])
+    expect(() => planInstall(bad, state({}, 3, 10), crc32)).toThrow(/broken widget icon trailer/);
+});
+
+test("an older stub is sent the package without its icons, size and CRC to match", async () => {
+  const [icons, stripped] = await Promise.all([load(iconsUrl), load(strippedUrl)]);
+  const w = new Watch();
+  const sent: [number, Uint8Array][] = [];
+  let written = 0;
+  let last = 0;
+
+  w.send = async (key, payload) => {
+    sent.push([key, payload!]);
+    last = key;
+    if (key === CMD.stubData) written += payload!.length - 4;
+  };
+  w.waitFor = async () => {
+    if (last !== CMD.stubData) return new Uint8Array([0]);
+    const r = new Uint8Array(5);
+
+    new DataView(r.buffer).setUint32(1, written, true);
+    return r;
+  };
+  await w.installPackage(icons, state({}, 3, 9));
+  const begin = new DataView(sent[0][1].buffer);
+
+  expect(begin.getUint32(1, true)).toBe(stripped.length);
+  expect(begin.getUint32(5, true)).toBe(crc32(stripped));
+  expect(written).toBe(stripped.length);
 });
 
 test("an install is BEGIN, DATA at the stub's offset in 128-byte pieces, END", async () => {
