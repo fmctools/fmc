@@ -75,16 +75,22 @@ editor/core/
     etc2.ts          cf 28 (ETC2 RGBA8) block codec
     budget.ts        what a screen takes in a Watch 3 Pro's RAM (SCREEN_BUDGET)
     fit.ts           fitForWatch: the file shrunk in RAM before it goes to a watch
+    compat.ts        which watch and firmware survives a face's procedural widgets (raw bytes)
     raw.ts           Face/FaceNode/Resource + TAG + byte primitives
   document/        # the document the editor edits
     doc.ts           Doc/Layer/Screen, meta + condition decoding, fromLegacy/toLegacy
     edits.ts         pure Doc -> Doc edits: add/remove/move/group/patch
     factory.ts       the layers the editor creates from scratch, and a blank document
     sources.ts       data sources: id labels, Sim, idValue, slot/condition helpers
+    proc.ts          the Watch 3 Pro's procedural widgets (0x82 + 0x5c) as layers
+    support.ts       where the open face can go — the editor's note, by compat.ts's rule
+    pro2.ts          the converted copy Export for Watch Pro 2 downloads
   render/
     render.ts        draw a screen from a Doc: per-kind draw functions + group auto-layout
     canvas.ts        renderer types (Ctx/Point/Size/LayerHit/ImageStore)
     arc.ts           progress rings: 0x5a/0x5b spec, fill fraction, both draw paths
+    proc-scene.ts    types 4..7's layout, a port of cmf-watch-sdk's wfproc.rs — change them together
+    proc.ts          the simulator's values fed to that layout, and its drawing
     pixels.ts        asset pixels: decode, resize/adjust, accent tint, previews
     screen.ts        screen and panel dimensions
     overlay.ts       editor chrome over a screen: selection boxes, handles, snap guides
@@ -100,6 +106,14 @@ device/lib/
   ota-image.ts     # the AOTA firmware container: verify before offering it to a watch
   wp2.ts           # what the App Loader stub reports: its release, the loader, the apps by slot
 ```
+
+Every watchface install ends in `flashFx` (`ble.model`): `fitForWatch`, `assertFlashable`, then
+`assertWatchCompat` (`core/format/compat.ts`) on the bytes that go out. The last one reads the raw
+file as the firmware's parser does, because a wrong verdict is a boot loop: never move it onto
+`parseBin`'s tree, and don't add a way to send a face around it. `PRO2_FACES_STUB` stays null
+until a stub release that draws types 4..7 has its number reserved in cmf-watch-sdk and is tried
+on a real watch. A procedural layer's rules (fixed image count, type 4 doesn't move, no rescale)
+live in `edits.ts` `procPatch` and `overlay.ts` `resizable`.
 
 `Face`/`FaceNode` are the file's own shape, not the editor's: `parseBin` produces them,
 `fromLegacy` turns them into a `Doc`, `toLegacy` turns one back, and the importers build them

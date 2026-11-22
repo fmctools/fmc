@@ -223,6 +223,38 @@ undocumented beyond this note. If a face is known (from the real device/app) to 
 color but the editor doesn't offer/apply it, check `meta[7]` on the specific widget by hand
 first — that's the only thing that's mattered so far.
 
+### Watch 3 Pro procedural widgets (0x82 + 0x5c)
+
+A `0x82` widget's first child is its struct (tag 1); a `0x5c` child holds the type as a u16 at +0
+and, for type 6, the panel as a u8 at +0x14. Both bodies are leaves: never descend into them.
+
+| type | face             | what it draws                                                 | images                      |
+| ---- | ---------------- | ------------------------------------------------------------- | --------------------------- |
+| 4    | Rainbow Lollipop | the ring under the finger, around the screen's centre         | none                        |
+| 5    | Briqbot          | clips at 33 ms a frame (0..39, 40..89, 90..158), tap for next | 159                         |
+| 6    | DataPulse        | panel 0 weather, 1 heart rate, 2 SpO2, 3 stress, 4 sleep      | 88 for panel 0, 13 for rest |
+| 7    | Luminous Beam    | percent of the calorie goal, three rotated digits             | 10                          |
+
+The layout is in `core/render/proc-scene.ts`. Where each type may be installed is in
+`core/format/compat.ts`, and it is a boot-loop matter:
+
+- both firmwares compare the u16 against a table ending in `0xffff` with a loop that stops at
+  `0xff`. A Watch Pro 2 (1.0.0.73) has types 0..3, a Watch 3 Pro (1.0.1.77) 0..7. A type past the
+  table calls whatever matches further on (8 and `0xffff` fault both in the emulator) or, by
+  chance, nothing (12). Don't rely on the chance.
+- the parser looks the first image up at the widget's fixed offset +0x15 from the struct node's
+  start, whatever that struct's length. A Pro 2 drops a type 4 that has no list there. A short
+  struct (18 bytes, no 2 bytes of padding) followed by a condition does have one as far as the
+  firmware is concerned, and boot-loops it: keep the `0000` tail.
+
+Sources only a Watch 3 Pro has run 0x8e..0x9d. Known: `0x93` the minutes of last night's sleep,
+`0x99` the number of the face's colour theme. A themed layer (meta[7] = 4) takes the theme the
+wearer picked, else the palette entry numbered by meta[4]; the two watches' palettes differ (Pro 2
+0x101FF59C, ten colours; 3 Pro 0x10235316, seven), and FMC renumbers neither.
+
+Colours in the 3 Pro emulator's frames are no reference for tinted layers: they come out with red
+and blue swapped against the palette and the factory thumbnails.
+
 ### Hard resource-packing rule
 
 **Every node's `images` array must reference _consecutive_ resource-array indices.**
