@@ -81,6 +81,8 @@ export const t = dict(
       `The connected watch is “${name}”, and this firmware is for the ${device}. It can't be installed on this watch from here — download only.`,
     unnamed: "unnamed",
     ownRisk: "You install it at your own risk. FMC takes no responsibility for your watch.",
+    rollbackRisk:
+      "Before installing stock or older firmware, switch to a built-in face and delete Watch 3 Pro faces with animated or data widgets from the watch: older firmware can restart in a loop on them.",
     acceptRisk: "I accept the risk",
     downloading: "Downloading",
     keepTabOpen: "Keep this tab open and the watch close.",
@@ -221,6 +223,8 @@ export const t = dict(
       unnamed: "без имени",
       ownRisk:
         "Вы устанавливаете её на свой страх и риск. FMC не несёт ответственности за ваши часы.",
+      rollbackRisk:
+        "Перед установкой стоковой или более старой прошивки включите встроенный циферблат и удалите с часов циферблаты Watch 3 Pro с анимацией и виджетами данных: на старой прошивке часы могут зациклиться на перезагрузке.",
       acceptRisk: "Я принимаю риск",
       downloading: "Загрузка",
       keepTabOpen: "Не закрывайте вкладку и держите часы рядом.",
@@ -357,6 +361,8 @@ export const t = dict(
         `Під'єднано годинник «${name}», а ця прошивка для ${device}. Звідси її на цей годинник не встановити — лише завантажити.`,
       unnamed: "без назви",
       ownRisk: "Ви встановлюєте її на власний ризик. FMC не несе відповідальності за ваш годинник.",
+      rollbackRisk:
+        "Перед встановленням стокової або старішої прошивки увімкніть вбудований циферблат і видаліть з годинника циферблати Watch 3 Pro з анімацією та віджетами даних: на старій прошивці годинник може циклічно перезавантажуватися.",
       acceptRisk: "Я приймаю ризик",
       downloading: "Завантаження",
       keepTabOpen: "Не закривайте вкладку й тримайте годинник поруч.",
@@ -493,6 +499,8 @@ export const t = dict(
         `El reloj conectado es “${name}” y este firmware es para el ${device}. No se puede instalar en este reloj desde aquí, solo descargar.`,
       unnamed: "sin nombre",
       ownRisk: "Lo instalas bajo tu propio riesgo. FMC no se hace responsable de tu reloj.",
+      rollbackRisk:
+        "Antes de instalar firmware original o anterior, cambia a una esfera integrada y borra del reloj las esferas del Watch 3 Pro con animaciones o widgets de datos: con un firmware anterior el reloj puede reiniciarse en bucle.",
       acceptRisk: "Acepto el riesgo",
       downloading: "Descargando",
       keepTabOpen: "Mantén esta pestaña abierta y el reloj cerca.",
@@ -627,6 +635,8 @@ export const t = dict(
         `कनेक्टेड घड़ी “${name}” है, और यह फ़र्मवेयर ${device} के लिए है। इसे यहां से इस घड़ी पर इंस्टॉल नहीं किया जा सकता — सिर्फ़ डाउनलोड।`,
       unnamed: "बिना नाम",
       ownRisk: "आप इसे अपने जोखिम पर इंस्टॉल करते हैं। आपकी घड़ी की कोई ज़िम्मेदारी FMC की नहीं है।",
+      rollbackRisk:
+        "स्टॉक या पुराना फ़र्मवेयर इंस्टॉल करने से पहले कोई बिल्ट-इन फ़ेस चुनें और Watch 3 Pro के एनिमेशन या डेटा विजेट वाले फ़ेस घड़ी से हटा दें: पुराने फ़र्मवेयर पर घड़ी बार-बार रीस्टार्ट हो सकती है।",
       acceptRisk: "मैं जोखिम स्वीकार करता/करती हूं",
       downloading: "डाउनलोड हो रहा है",
       keepTabOpen: "यह टैब खुला रखें और घड़ी पास रखें।",

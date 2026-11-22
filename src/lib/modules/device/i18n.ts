@@ -73,6 +73,8 @@ export const t = dict(
     fileMeta: (kb: string, time: string) => `${kb} KB, modified ${time}`,
     firmwareRisk:
       "A firmware image can brick the watch. Battery at 50% or more, on the charger, tab open until it's done.",
+    rollbackRisk:
+      "Before installing stock or older firmware, switch to a built-in face and delete Watch 3 Pro faces with animated or data widgets from the watch: older firmware can restart in a loop on them.",
     acceptRisk: "I accept the risk",
     installingOnWatch: "Installing on the watch",
     isOnWatch: (name: string) => `${name} is on the watch.`,
@@ -196,6 +198,8 @@ export const t = dict(
       fileMeta: (kb: string, time: string) => `${kb} КБ, изменён в ${time}`,
       firmwareRisk:
         "Образ прошивки может превратить часы в кирпич. Заряд от 50%, часы на зарядке, вкладка открыта до конца установки.",
+      rollbackRisk:
+        "Перед установкой стоковой или более старой прошивки включите встроенный циферблат и удалите с часов циферблаты Watch 3 Pro с анимацией и виджетами данных: на старой прошивке часы могут зациклиться на перезагрузке.",
       acceptRisk: "Я принимаю риск",
       installingOnWatch: "Установка на часы",
       isOnWatch: (name: string) => `«${name}» уже на часах.`,
@@ -317,6 +321,8 @@ export const t = dict(
       fileMeta: (kb: string, time: string) => `${kb} КБ, змінено о ${time}`,
       firmwareRisk:
         "Образ прошивки може перетворити годинник на цеглину. Заряд від 50%, годинник на зарядці, вкладка відкрита до кінця встановлення.",
+      rollbackRisk:
+        "Перед встановленням стокової або старішої прошивки увімкніть вбудований циферблат і видаліть з годинника циферблати Watch 3 Pro з анімацією та віджетами даних: на старій прошивці годинник може циклічно перезавантажуватися.",
       acceptRisk: "Я приймаю ризик",
       installingOnWatch: "Встановлення на годинник",
       isOnWatch: (name: string) => `«${name}» уже на годиннику.`,
@@ -438,6 +444,8 @@ export const t = dict(
       fileMeta: (kb: string, time: string) => `${kb} KB, modificado a las ${time}`,
       firmwareRisk:
         "Una imagen de firmware puede dejar el reloj inservible. Batería al 50 % o más, en el cargador y la pestaña abierta hasta que termine.",
+      rollbackRisk:
+        "Antes de instalar firmware original o anterior, cambia a una esfera integrada y borra del reloj las esferas del Watch 3 Pro con animaciones o widgets de datos: con un firmware anterior el reloj puede reiniciarse en bucle.",
       acceptRisk: "Acepto el riesgo",
       installingOnWatch: "Instalando en el reloj",
       isOnWatch: (name: string) => `${name} ya está en el reloj.`,
@@ -558,6 +566,8 @@ export const t = dict(
       fileMeta: (kb: string, time: string) => `${kb} KB, ${time} पर बदली गई`,
       firmwareRisk:
         "फ़र्मवेयर इमेज घड़ी को हमेशा के लिए खराब (ब्रिक) कर सकती है। बैटरी 50% या ज़्यादा हो, घड़ी चार्जर पर हो, और काम पूरा होने तक टैब खुला रहे।",
+      rollbackRisk:
+        "स्टॉक या पुराना फ़र्मवेयर इंस्टॉल करने से पहले कोई बिल्ट-इन फ़ेस चुनें और Watch 3 Pro के एनिमेशन या डेटा विजेट वाले फ़ेस घड़ी से हटा दें: पुराने फ़र्मवेयर पर घड़ी बार-बार रीस्टार्ट हो सकती है।",
       acceptRisk: "जोखिम मुझे मंज़ूर है",
       installingOnWatch: "घड़ी पर इंस्टॉल हो रहा है",
       isOnWatch: (name: string) => `${name} घड़ी पर है।`,

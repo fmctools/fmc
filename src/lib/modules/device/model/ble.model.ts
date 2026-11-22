@@ -14,6 +14,7 @@ import type { Wp2State } from "../lib/wp2";
 import { rememberDial, unclaimDial } from "../lib/catalog-names";
 import {
   assertFlashable,
+  assertWatchCompat,
   fitForWatchOffThread,
   flashWarning,
 } from "$lib/modules/editor/core/format";
@@ -127,6 +128,7 @@ const flashFx = createEffect(async ({ bin: file, preview, key, slot, confirmed }
   const { bin, compressed } = await fitForWatchOffThread(file, device);
 
   assertFlashable(bin, device);
+  await assertWatchCompat(bin, device, async () => (await watch!.readWp2())?.stub.version ?? null);
   const warning = confirmed ? null : flashWarning(bin);
 
   if (warning) throw new NeedsConfirmError(warning);

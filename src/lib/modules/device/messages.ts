@@ -1,5 +1,5 @@
 // What the watch connection says — BLE statuses and the errors of ble.ts, ota-image.ts, wp2.ts
-// and the flash checks in editor/core/format/bin.ts — in the UI language.
+// and the flash checks in editor/core/format (bin.ts, compat.ts) — in the UI language.
 //
 // Those files keep writing English: the log (Copy log) and analytics (reasonOf) read it, and the
 // protocol code shouldn't know about languages. The text is translated where it reaches a store
@@ -70,6 +70,12 @@ const en = {
   bigImage: (w: string, h: string) =>
     `This face has a ${w}×${h} px image, larger than factory faces use. The watch may run out of memory loading it and restart in a loop, and there is no confirmed way out of that loop yet.`,
   // firmware update
+  widgetUnknown: (type: string) =>
+    `this face has a widget of type ${type}, which no supported watch knows — it can restart a watch in a loop. Nothing was sent to the watch.`,
+  widgetUnsupported: (type: string) =>
+    `this face has a Watch 3 Pro widget (type ${type}) that this watch's firmware can't draw — the watch would restart in a loop. Nothing was sent to the watch.`,
+  etc2OverTested: (need: string, max: string) =>
+    `this face's ETC2 images need ${need} MB unpacked on a Watch Pro 2, over the ${max} MB tested there — the watch could restart in a loop. Nothing was sent to the watch.`,
   noOtaChannel: "the watch didn't offer its firmware-update channel — reconnect and retry",
   refusedUpdate: (d: string) => `the watch refused the update (${d})`,
   refusedStart: (d: string) => `the watch refused to start (${d})`,
@@ -175,6 +181,12 @@ export const bt = dict(en, {
       `${aod ? "экрану always-on" : "основному экрану"} нужно ${need} МБ памяти часов, а Watch 3 Pro вмещает ${max} МБ — часы зациклятся на перезагрузке. Используйте меньше полноэкранных изображений или уменьшите их.`,
     bigImage: (w, h) =>
       `В циферблате есть изображение ${w}×${h} px — больше, чем в заводских. Часам может не хватить памяти, и они зациклятся на перезагрузке, а проверенного способа выйти из этого цикла пока нет.`,
+    widgetUnknown: (type) =>
+      `в этом циферблате виджет типа ${type}, его не знают ни одни поддерживаемые часы — от него часы могут зациклиться на перезагрузке. На часы ничего не отправлено.`,
+    widgetUnsupported: (type) =>
+      `в этом циферблате виджет Watch 3 Pro (тип ${type}), который прошивка этих часов не умеет рисовать — часы зациклятся на перезагрузке. На часы ничего не отправлено.`,
+    etc2OverTested: (need, max) =>
+      `изображениям ETC2 этого циферблата на Watch Pro 2 нужно ${need} МБ после распаковки, а проверено только до ${max} МБ — часы могут зациклиться на перезагрузке. На часы ничего не отправлено.`,
     noOtaChannel: "часы не открыли канал обновления прошивки — переподключитесь и повторите",
     refusedUpdate: (d) => `часы отклонили обновление (${d})`,
     refusedStart: (d) => `часы отказались начать (${d})`,
@@ -276,6 +288,12 @@ export const bt = dict(en, {
       `${aod ? "екрану always-on" : "основному екрану"} потрібно ${need} МБ пам'яті годинника, а Watch 3 Pro вміщує ${max} МБ — годинник циклічно перезавантажуватиметься. Використайте менше повноекранних зображень або зменште їх.`,
     bigImage: (w, h) =>
       `У циферблаті є зображення ${w}×${h} px — більше, ніж у заводських. Годиннику може забракнути пам'яті, і він циклічно перезавантажуватиметься, а перевіреного способу вийти з цього циклу поки немає.`,
+    widgetUnknown: (type) =>
+      `у цьому циферблаті віджет типу ${type}, його не знає жоден підтримуваний годинник — через нього годинник може циклічно перезавантажуватися. На годинник нічого не надіслано.`,
+    widgetUnsupported: (type) =>
+      `у цьому циферблаті віджет Watch 3 Pro (тип ${type}), який прошивка цього годинника не вміє малювати — годинник циклічно перезавантажуватиметься. На годинник нічого не надіслано.`,
+    etc2OverTested: (need, max) =>
+      `зображенням ETC2 цього циферблата на Watch Pro 2 потрібно ${need} МБ після розпакування, а перевірено лише до ${max} МБ — годинник може циклічно перезавантажуватися. На годинник нічого не надіслано.`,
     noOtaChannel: "годинник не відкрив канал оновлення прошивки — під'єднайтеся знову й повторіть",
     refusedUpdate: (d) => `годинник відхилив оновлення (${d})`,
     refusedStart: (d) => `годинник відмовився почати (${d})`,
@@ -377,6 +395,12 @@ export const bt = dict(en, {
       `la pantalla ${aod ? "siempre activa" : "principal"} necesita ${need} MB de memoria del reloj, más de los ${max} MB que caben en un Watch 3 Pro — se reiniciaría en bucle. Usa menos imágenes a pantalla completa o hazlas más pequeñas.`,
     bigImage: (w, h) =>
       `Esta esfera tiene una imagen de ${w}×${h} px, mayor que las de las esferas de fábrica. El reloj puede quedarse sin memoria al cargarla y reiniciarse en bucle, y aún no hay una forma confirmada de salir de ese bucle.`,
+    widgetUnknown: (type) =>
+      `esta esfera tiene un widget de tipo ${type} que ningún reloj compatible conoce — puede dejar el reloj reiniciándose en bucle. No se envió nada al reloj.`,
+    widgetUnsupported: (type) =>
+      `esta esfera tiene un widget del Watch 3 Pro (tipo ${type}) que el firmware de este reloj no sabe dibujar — el reloj se reiniciaría en bucle. No se envió nada al reloj.`,
+    etc2OverTested: (need, max) =>
+      `las imágenes ETC2 de esta esfera necesitan ${need} MB descomprimidas en un Watch Pro 2, más de los ${max} MB probados — el reloj podría reiniciarse en bucle. No se envió nada al reloj.`,
     noOtaChannel:
       "el reloj no ofreció su canal de actualización de firmware — reconecta y reintenta",
     refusedUpdate: (d) => `el reloj rechazó la actualización (${d})`,
@@ -480,6 +504,12 @@ export const bt = dict(en, {
       `${aod ? "ऑलवेज़-ऑन" : "मुख्य"} स्क्रीन को घड़ी की ${need} MB मेमोरी चाहिए, जबकि Watch 3 Pro में ${max} MB ही आती है — घड़ी बार-बार रीस्टार्ट होगी। कम या छोटी फ़ुल-स्क्रीन इमेज इस्तेमाल करें।`,
     bigImage: (w, h) =>
       `इस फ़ेस में ${w}×${h} px की इमेज है, जो फ़ैक्टरी फ़ेस से बड़ी है। घड़ी की मेमोरी खत्म हो सकती है और वह बार-बार रीस्टार्ट हो सकती है, और इस लूप से निकलने का कोई पक्का तरीका अभी नहीं है।`,
+    widgetUnknown: (type) =>
+      `इस फ़ेस में टाइप ${type} का विजेट है, जिसे कोई समर्थित घड़ी नहीं पहचानती — इससे घड़ी बार-बार रीस्टार्ट हो सकती है। घड़ी पर कुछ नहीं भेजा गया।`,
+    widgetUnsupported: (type) =>
+      `इस फ़ेस में Watch 3 Pro का विजेट (टाइप ${type}) है, जिसे इस घड़ी का फ़र्मवेयर नहीं दिखा सकता — घड़ी बार-बार रीस्टार्ट होती रहेगी। घड़ी पर कुछ नहीं भेजा गया।`,
+    etc2OverTested: (need, max) =>
+      `इस फ़ेस की ETC2 इमेज को Watch Pro 2 पर अनपैक होकर ${need} MB चाहिए, जो वहाँ जाँची गई ${max} MB सीमा से ज़्यादा है — घड़ी बार-बार रीस्टार्ट हो सकती है। घड़ी पर कुछ नहीं भेजा गया।`,
     noOtaChannel: "घड़ी ने फ़र्मवेयर अपडेट चैनल नहीं खोला — फिर से कनेक्ट करके कोशिश करें",
     refusedUpdate: (d) => `घड़ी ने अपडेट अस्वीकार किया (${d})`,
     refusedStart: (d) => `घड़ी ने शुरू करने से मना किया (${d})`,
@@ -588,6 +618,12 @@ const RULES: Rule[] = [
   [
     /^the (.+?) screen needs ([\d.]+) MB of the watch's memory, over the ([\d.]+) MB/,
     (w, m) => w.screenOverBudget(m[1] === "always-on", m[2], m[3]),
+  ],
+  [/^this face has a widget of type (\d+), /, (w, m) => w.widgetUnknown(m[1])],
+  [/^this face has a Watch 3 Pro widget \(type (\d+)\)/, (w, m) => w.widgetUnsupported(m[1])],
+  [
+    /^this face's ETC2 images need ([\d.]+) MB unpacked on a Watch Pro 2, over the ([\d.]+) MB/,
+    (w, m) => w.etc2OverTested(m[1], m[2]),
   ],
   lit("noOtaChannel"),
   [/^the watch refused the update \((.+)\)$/, (w, m) => w.refusedUpdate(m[1])],

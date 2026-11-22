@@ -106,7 +106,7 @@
       {#if firmware}
         <div class="disclaimer" role="note">
           <Icon name="warning" size={20} />
-          <span>{$t.firmwareRisk}</span>
+          <span>{$t.firmwareRisk} <span class="rollback">{$t.rollbackRisk}</span></span>
         </div>
         <label class="accept">
           <Checkbox checked={$riskAccepted} onChange={(v) => riskAcceptedSet(v)} />
@@ -205,6 +205,10 @@
     :global(.icon) {
       flex: none;
     }
+  }
+  .rollback {
+    display: block;
+    margin-top: 0.5rem;
   }
   .accept {
     display: flex;

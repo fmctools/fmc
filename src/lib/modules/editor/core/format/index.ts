@@ -4,3 +4,4 @@ export * from "./pixels-codec";
 export * from "./raw";
 export * from "./budget";
 export * from "./fit";
+export * from "./compat";

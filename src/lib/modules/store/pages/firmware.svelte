@@ -149,6 +149,8 @@
           <Icon name="warning" size={20} />
           <span>
             {$t.ownRisk}
+            <!-- same plate: an older image can't draw what a newer one let in (editor compat.ts) -->
+            {#if ota && !loader}<span class="rollback">{$t.rollbackRisk}</span>{/if}
           </span>
         </div>
 
@@ -384,6 +386,10 @@
       flex: none;
     }
     /* which watch is the one thing on this plate to read first */
+  }
+  .rollback {
+    display: block;
+    margin-top: 0.5rem;
   }
   .accept {
     display: flex;

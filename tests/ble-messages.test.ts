@@ -9,6 +9,7 @@ import ble from "$lib/modules/device/lib/ble.ts?raw";
 import ota from "$lib/modules/device/lib/ota-image.ts?raw";
 import wp2 from "$lib/modules/device/lib/wp2.ts?raw";
 import bin from "$lib/modules/editor/core/format/bin.ts?raw";
+import compat from "$lib/modules/editor/core/format/compat.ts?raw";
 
 // protocol internals nobody acts on: shown as they are, inside a translated "decode: …"
 const TECHNICAL =
@@ -31,7 +32,10 @@ test("every status and error from the watch libraries has a translation", () => 
   i18nModel.localePicked("ru");
   const w = bt.getState();
   const said = [
-    ...sentences(ble + ota + wp2, new RegExp(String.raw`(?:status|Error)\(\s*` + LIT, "g")),
+    ...sentences(
+      ble + ota + wp2 + compat,
+      new RegExp(String.raw`(?:status|Error)\(\s*` + LIT, "g"),
+    ),
     ...sentences(
       bin.slice(bin.indexOf("export function assertFlashable")),
       new RegExp(String.raw`(?:Error\(|\?)\s*` + LIT, "g"),
