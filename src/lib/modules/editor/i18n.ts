@@ -20,7 +20,8 @@ export const t = dict(
     support: {
       none: "No supported watch can take this face: it has a widget of an unknown type.",
       pro3Only: "Watch 3 Pro only: a Watch Pro 2 would restart in a loop on this face.",
-      pro2Converts: "Made for a Watch 3 Pro: for a Watch Pro 2, use Export for Watch Pro 2.",
+      pro2Converts:
+        "Uses Watch 3 Pro image formats or data: for a Watch Pro 2, use Export for Watch Pro 2.",
       pro2Drops: "Watch 3 Pro. A Watch Pro 2 runs it without the touch widget.",
     },
     exportBin: "Export .bin",
@@ -220,7 +221,7 @@ export const t = dict(
         none: "Ни одни поддерживаемые часы не примут этот циферблат: в нём виджет неизвестного типа.",
         pro3Only: "Только Watch 3 Pro: Watch Pro 2 на этом циферблате зациклится на перезагрузке.",
         pro2Converts:
-          "Сделан для Watch 3 Pro: для Watch Pro 2 используйте «Экспорт для Watch Pro 2».",
+          "Использует форматы изображений или данные Watch 3 Pro: для Watch Pro 2 используйте «Экспорт для Watch Pro 2».",
         pro2Drops: "Watch 3 Pro. На Watch Pro 2 работает без виджета касания.",
       },
       exportBin: "Экспорт .bin",
@@ -403,7 +404,7 @@ export const t = dict(
         pro3Only:
           "Лише Watch 3 Pro: Watch Pro 2 на цьому циферблаті циклічно перезавантажуватиметься.",
         pro2Converts:
-          "Створено для Watch 3 Pro: для Watch Pro 2 скористайтеся «Експорт для Watch Pro 2».",
+          "Використовує формати зображень або дані Watch 3 Pro: для Watch Pro 2 скористайтеся «Експорт для Watch Pro 2».",
         pro2Drops: "Watch 3 Pro. На Watch Pro 2 працює без віджета дотику.",
       },
       exportBin: "Експорт .bin",
@@ -585,7 +586,7 @@ export const t = dict(
         none: "Ningún reloj compatible acepta esta esfera: tiene un widget de tipo desconocido.",
         pro3Only: "Solo Watch 3 Pro: un Watch Pro 2 se reiniciaría en bucle con esta esfera.",
         pro2Converts:
-          "Hecha para el Watch 3 Pro: para un Watch Pro 2 usa «Exportar para Watch Pro 2».",
+          "Usa formatos de imagen o datos del Watch 3 Pro: para un Watch Pro 2 usa «Exportar para Watch Pro 2».",
         pro2Drops: "Watch 3 Pro. En un Watch Pro 2 funciona sin el widget táctil.",
       },
       exportBin: "Exportar .bin",
@@ -767,7 +768,7 @@ export const t = dict(
         none: "कोई समर्थित घड़ी यह फ़ेस नहीं ले सकती: इसमें अज्ञात टाइप का विजेट है।",
         pro3Only: "सिर्फ़ Watch 3 Pro: Watch Pro 2 इस फ़ेस पर बार-बार रीस्टार्ट होगी।",
         pro2Converts:
-          "Watch 3 Pro के लिए बना है: Watch Pro 2 के लिए “Watch Pro 2 के लिए एक्सपोर्ट” इस्तेमाल करें।",
+          "Watch 3 Pro के इमेज फ़ॉर्मेट या डेटा का इस्तेमाल करता है: Watch Pro 2 के लिए “Watch Pro 2 के लिए एक्सपोर्ट” इस्तेमाल करें।",
         pro2Drops: "Watch 3 Pro। Watch Pro 2 पर यह टच विजेट के बिना चलता है।",
       },
       exportBin: ".bin एक्सपोर्ट",

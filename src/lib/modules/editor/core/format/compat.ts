@@ -1,4 +1,5 @@
-// Which watch a face's procedural widgets (tag 0x82 with a 0x5c body) are safe on.
+// Which watch a face is safe on: by its procedural widgets (tag 0x82 with a 0x5c body), and for a
+// Watch Pro 2 by the Watch 3 Pro's image formats too (the end of assertWatchCompat).
 //
 // Both watches' firmware looks the widget's type (a u16) up in a table that ends in 0xffff with a
 // loop that stops at 0xff, so a type the table doesn't have reads on past it and calls whatever
@@ -160,6 +161,14 @@ export async function assertWatchCompat(
   // whatever the stub's release says: one that decodes cf 28 may be on the watch already, and on
   // stock those images don't show at all
   const { screens, resources } = parseBin(bin);
+
+  // unknown on a real watch, and no stub converts it. Every resource counts, the thumbnail (the
+  // face picker draws it there too) and whatever the tree walk can't place: unknown means refused.
+  // ponytail: lift it, or narrow it to the thumbnail, once cf 14 has been seen on a Watch Pro 2.
+  if (resources.some((r) => r.cf === 14))
+    throw new Error(
+      "this face has A8 images (cf 14), which haven't been tested on a Watch Pro 2. Open it in the editor, use Export for Watch Pro 2 and install the exported file. Nothing was sent to the watch.",
+    );
 
   for (const screen of screens) {
     const etc2 = drawnFormats(screen, resources).has(28);

@@ -2,7 +2,7 @@
 // would boot-loop the connected watch never reaches the upload. Transport stubbed out.
 import { beforeAll, beforeEach, expect, test, vi } from "vitest";
 import { bleModel } from "$lib/modules/device/model";
-import { faceBin, procNode, squares } from "./proc-face";
+import { faceBin, imageNode, procNode, squares } from "./proc-face";
 
 const sent = vi.hoisted(() => ({ uploads: [] as Uint8Array[], asked: 0 }));
 
@@ -44,6 +44,14 @@ test("a Watch Pro 2 is never sent a widget its firmware falls over", async () =>
   });
   expect(sent.uploads).toEqual([]);
   expect(sent.asked).toBe(0); // no stub release draws these yet, so there is nothing to ask
+});
+
+test("an A8 face is refused with a pointer to the export", async () => {
+  bleModel.flashRequested({ bin: faceBin([imageNode([0])], squares(1, 14)) });
+  await vi.waitFor(() => expect(bleModel.$bleStatus.getState()).toMatch(/A8 images/), {
+    timeout: 5000,
+  });
+  expect(sent.uploads).toEqual([]);
 });
 
 test("and still gets the one it drops safely", async () => {

@@ -7,7 +7,7 @@ import { toLegacy, type Doc, type Layer } from "./doc";
 
 /** The colour theme's number: a source only a Watch 3 Pro answers. */
 export const THEME_SOURCE = 0x99;
-/** Formats a stock Watch Pro 2 doesn't show: A8 masks and ETC2. */
+/** What the export re-encodes: A8 (not sent to a Watch Pro 2) and ETC2 (stock doesn't show it). */
 export const PRO2_CONVERTS = [14, 28];
 
 /**
@@ -44,11 +44,11 @@ export function watchSupport(doc: Doc): Support {
   }
   if (widgets.some(isUnknownWidget)) return "none";
   if (widgets.some((w) => !stockSafe(w, "watch_pro_2"))) return "pro3Only";
-  const converts = face.screens.some((s) => {
-    const formats = drawnFormats(s, face.resources);
-
-    return PRO2_CONVERTS.some((cf) => formats.has(cf));
-  });
+  // A8 anywhere, the thumbnail included, is refused at install (compat.ts); ETC2 only matters
+  // where a screen draws it
+  const converts =
+    face.resources.some((r) => r.cf === 14) ||
+    face.screens.some((s) => drawnFormats(s, face.resources).has(28));
 
   if (converts || usesTheme(doc)) return "pro2Converts";
   return widgets.some((w) => w.type === 4) ? "pro2Drops" : null;

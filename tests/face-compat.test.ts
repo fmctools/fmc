@@ -2,7 +2,7 @@
 // refusal here was a boot loop in the cmf-watch-utils emulator, or falls in the same table bug.
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
-import { TAG } from "$lib/modules/editor/core/format";
+import { buildBin, parseBin, TAG } from "$lib/modules/editor/core/format";
 import {
   assertWatchCompat,
   PRO2_FACES_STUB,
@@ -182,6 +182,44 @@ describe("ETC2 on a Watch Pro 2", () => {
 
   test("and left to the budget on a Watch 3 Pro", async () => {
     await expect(assertWatchCompat(etc2(4), P3, noStub)).resolves.toBeUndefined();
+  });
+});
+
+// Nobody has seen what a Watch Pro 2 does with an A8 image, and the emulator stops on them.
+describe("A8 (cf 14) on a Watch Pro 2", () => {
+  const a8 = () => faceBin([imageNode([0])], squares(1, 14));
+
+  test("is refused, with the way out", async () => {
+    await expect(assertWatchCompat(a8(), P2, noStub)).rejects.toThrow(
+      /A8 images \(cf 14\).*Export for Watch Pro 2/,
+    );
+  });
+
+  test("whatever the stub: none of them converts A8", async () => {
+    await expect(check(a8(), P2, 10)).rejects.toThrow(/A8 images/);
+  });
+
+  test("also as a frame that isn't the run's largest", async () => {
+    const bin = faceBin([imageNode([0, 1])], [...squares(1, 5, 8, 8), ...squares(1, 14)]);
+
+    await expect(assertWatchCompat(bin, P2, noStub)).rejects.toThrow(/A8 images/);
+  });
+
+  test("the thumbnail counts: the face picker draws it on the same watch", async () => {
+    const face = parseBin(faceBin([imageNode([0])], squares(1)));
+
+    face.resources[face.resources.length - 1] = squares(1, 14, 8, 8)[0];
+    await expect(assertWatchCompat(buildBin(face), P2, noStub)).rejects.toThrow(/A8 images/);
+  });
+
+  test("a Watch 3 Pro takes them", async () => {
+    await expect(assertWatchCompat(a8(), P3, noStub)).resolves.toBeUndefined();
+  });
+
+  test("a boot loop is named before a format", async () => {
+    const bin = faceBin([procNode({ type: 6, images: [0] })], squares(1, 14));
+
+    await expect(assertWatchCompat(bin, P2, noStub)).rejects.toThrow(/type 6/);
   });
 });
 

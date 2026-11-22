@@ -124,7 +124,15 @@ describe("where the face can go", () => {
     expect(support(faceBin([imageNode([0, 1], 0x99)], squares(2)))).toBe("pro2Converts");
   });
 
-  test("the thumbnail's format alone asks for nothing", () => {
+  // the install refuses it, so the note has to offer the export that gets past that
+  test("an A8 thumbnail alone needs converting", () => {
+    const face = parseBin(faceBin([imageNode([0])], squares(1)));
+
+    face.resources[face.resources.length - 1] = squares(1, 14, 8, 8)[0];
+    expect(support(buildBin(face))).toBe("pro2Converts");
+  });
+
+  test("an ETC2 thumbnail alone asks for nothing", () => {
     const face = parseBin(faceBin([imageNode([0])], squares(1)));
     const preview = face.screens[0].subs!.find((n) => n.tag === TAG.preview)!.subs![0].images![0];
 

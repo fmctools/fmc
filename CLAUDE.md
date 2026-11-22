@@ -75,7 +75,7 @@ editor/core/
     etc2.ts          cf 28 (ETC2 RGBA8) block codec
     budget.ts        what a screen takes in a Watch 3 Pro's RAM (SCREEN_BUDGET)
     fit.ts           fitForWatch: the file shrunk in RAM before it goes to a watch
-    compat.ts        which watch and firmware survives a face's procedural widgets (raw bytes)
+    compat.ts        which watch and firmware a face may go to: widgets (raw bytes), A8, ETC2
     raw.ts           Face/FaceNode/Resource + TAG + byte primitives
   document/        # the document the editor edits
     doc.ts           Doc/Layer/Screen, meta + condition decoding, fromLegacy/toLegacy
@@ -112,8 +112,9 @@ Every watchface install ends in `flashFx` (`ble.model`): `fitForWatch`, `assertF
 file as the firmware's parser does, because a wrong verdict is a boot loop: never move it onto
 `parseBin`'s tree, and don't add a way to send a face around it. `PRO2_FACES_STUB` stays null
 until a stub release that draws types 4..7 has its number reserved in cmf-watch-sdk and is tried
-on a real watch. A procedural layer's rules (fixed image count, type 4 doesn't move, no rescale)
-live in `edits.ts` `procPatch` and `overlay.ts` `resizable`.
+on a real watch, and a Watch Pro 2 gets no cf 14 until that is seen working on one. A procedural
+layer's rules (fixed image count, type 4 doesn't move, no rescale) live in `edits.ts` `procPatch`
+and `overlay.ts` `resizable`.
 
 `Face`/`FaceNode` are the file's own shape, not the editor's: `parseBin` produces them,
 `fromLegacy` turns them into a `Doc`, `toLegacy` turns one back, and the importers build them
