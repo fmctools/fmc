@@ -34,6 +34,7 @@ import { $doc, committed, docLoaded } from "./doc.model";
 import { $sim } from "./sim.model";
 import { $screen, $selected } from "./selection.model";
 import { errored } from "./ui.model";
+import { procOf } from "../core/document/proc";
 
 /** A hand's pivot before any resize, so repeated resizes scale from the same numbers instead of
  *  re-rounding an already-rounded value. Editor-only and per-session, like the bitmap cache.
@@ -139,8 +140,10 @@ const replaceImageFx = attach({
       let data: Uint8Array = new Uint8Array(await file.arrayBuffer());
       let bitmap = await createImageBitmap(new Blob([data as BlobPart], { type: "image/jpeg" }));
       const fit = fitScreen(bitmap.width, bitmap.height);
+      // the browser decodes a PNG under that type too; the watch's JPEG decoder would not
+      const isJpeg = data[0] === 0xff && data[1] === 0xd8;
 
-      if (fit.w !== bitmap.width || fit.h !== bitmap.height) {
+      if (!isJpeg || fit.w !== bitmap.width || fit.h !== bitmap.height) {
         data = await encodeBitmap(bitmap, fit.w, fit.h, 1);
         bitmap = await createImageBitmap(new Blob([data as BlobPart], { type: "image/jpeg" }));
       }
@@ -251,7 +254,8 @@ const resizeImageFx = attach({
     const l = doc ? findLayer(doc, layer) : null;
     const frames = l ? framesOf(l) : [];
 
-    if (!doc || !l || !frames.length || l.locked) return null; // locked: no resize, from anywhere
+    // locked, or a procedural widget (overlay's resizable): no resize, from anywhere
+    if (!doc || !l || !frames.length || l.locked || procOf(l)) return null;
     const tw = dim(w),
       th = dim(h);
     const first = doc.images.get(frames[0]);
@@ -333,7 +337,8 @@ const resizeGroupFx = attach({
     const scaleY = (v: number) => Math.round(v * kh);
 
     const walk = async (l: Layer): Promise<Layer> => {
-      if (l.kind === "raw" || l.locked) return l; // a locked child holds its size, like anywhere else
+      // a locked child holds its size, like anywhere else; a procedural one lays out its own
+      if (l.kind === "raw" || l.locked || procOf(l)) return l;
       if (l.kind === "group")
         return {
           ...l,
@@ -401,7 +406,7 @@ const rotateImageFx = attach({
     const frames = l ? framesOf(l) : [];
     const first = doc && frames.length ? doc.images.get(frames[0]) : null;
 
-    if (!doc || !l || !first || l.locked || !(deg % 360)) return null;
+    if (!doc || !l || !first || l.locked || procOf(l) || !(deg % 360)) return null;
     const assets = new Map<ImageId, ImageAsset>();
     const cached = new Map<ImageId, ImageCache>();
 

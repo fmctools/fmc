@@ -4,6 +4,8 @@
 // then only decides when to run them, what to checkpoint, and what stays selected. Everything
 // here is keyed by NodeId, which is what makes the layer identity survive an immutable update:
 // the old code compared node objects, so any rebuilt parent silently invalidated `sel`.
+import { hex, TAG, unhex } from "../format";
+import { PANELS, procOf, RINGS, type Proc } from "./proc";
 import {
   framesOf,
   isPlaced,
@@ -129,8 +131,49 @@ function mapLayers(doc: Doc, fn: (l: Layer) => Layer | null): Doc {
   return { ...doc, screens: doc.screens.map((s) => ({ ...s, layers: walk(s.layers) })) };
 }
 
-export const patchLayer = (doc: Doc, id: NodeId, patch: Partial<Layer>): Doc =>
-  mapLayers(doc, (l) => (l.id === id ? ({ ...l, ...patch } as Layer) : l));
+/** What of a patch a procedural widget takes, or null for none of it. Every way to edit a layer
+ *  ends in patchLayer, so the widget's own rules hold here: its image count is fixed, and type 4
+ *  doesn't move (the watch tests the finger against the screen's centre, wherever the art is). */
+function procPatch(l: Layer, proc: Proc, patch: Partial<Layer>): Partial<Layer> | null {
+  const out: Record<string, unknown> = { ...patch };
+
+  if (proc.type === RINGS) {
+    delete out.x;
+    delete out.y;
+  }
+  const frames = out.frames as readonly ImageId[] | undefined;
+
+  if (frames && frames.length !== framesOf(l).length) delete out.frames;
+  return Object.keys(out).length ? (out as Partial<Layer>) : null;
+}
+
+export function patchLayer(doc: Doc, id: NodeId, patch: Partial<Layer>): Doc {
+  const target = findLayer(doc, id);
+  const proc = target && procOf(target);
+  const taken = proc ? procPatch(target!, proc, patch) : patch;
+
+  return taken ? mapLayers(doc, (l) => (l.id === id ? ({ ...l, ...taken } as Layer) : l)) : doc;
+}
+
+/** Another of DataPulse's lower panels (1..4): they share a list of 13 images. Weather (0) has
+ *  88 of its own, so there is no switching to it or from it. */
+export function withPanel(doc: Doc, id: NodeId, panel: number): Doc {
+  const l = findLayer(doc, id);
+  const p = l && procOf(l);
+
+  if (!l || !p || p.type !== PANELS || l.kind === "group" || l.kind === "raw") return doc;
+  if (p.panel === panel || ![p.panel, panel].every((n) => n >= 1 && n <= 4)) return doc;
+  const extra = l.extra!.map((e) => {
+    if (e.tag !== TAG.proc) return e;
+    const body = unhex(e.hex);
+
+    if (body.length <= 0x14) return e;
+    body[0x14] = panel;
+    return { ...e, hex: hex(body) };
+  });
+
+  return patchLayer(doc, id, { extra } as Partial<Layer>);
+}
 
 export const removeLayer = (doc: Doc, id: NodeId): Doc =>
   mapLayers(doc, (l) => (l.id === id ? null : l));

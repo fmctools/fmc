@@ -12,7 +12,7 @@
 // after it "has images" on the watch and boot-loops it, with none in the tree.
 
 import { parseBin } from "./bin";
-import { decodedBytes, screenBytes, shownResources } from "./budget";
+import { screenBytes } from "./budget";
 import type { FaceNode, Resource } from "./raw";
 import { TAG, u16 } from "./raw";
 
@@ -104,6 +104,20 @@ export function stockSafe(w: ProcWidget, device: string | null): boolean {
   return device === "watch_pro_2" && w.type === 4 && !w.hasImages;
 }
 
+/** The colour formats of everything a screen can draw, every frame of every run; the embedded
+ *  thumbnail, which the face picker shows, left out. */
+export function drawnFormats(screen: FaceNode, resources: Resource[]): Set<number> {
+  const formats = new Set<number>();
+  const walk = (n: FaceNode) => {
+    if (n.tag === TAG.preview) return;
+    n.images?.forEach((i) => formats.add(resources[i].cf));
+    n.subs?.forEach(walk);
+  };
+
+  walk(screen);
+  return formats;
+}
+
 /** Bytes a screen takes with its ETC2 images unpacked to cf 5, which is how a Watch Pro 2 holds
  *  them (stub 10 does it on load, FMC's export does it in the file). */
 export const unpackedBytes = (screen: FaceNode, resources: Resource[]) =>
@@ -148,9 +162,7 @@ export async function assertWatchCompat(
   const { screens, resources } = parseBin(bin);
 
   for (const screen of screens) {
-    const etc2 = [...shownResources(screen, resources)].some(
-      (i) => resources[i].cf === 28 && decodedBytes(resources[i]) > 0,
-    );
+    const etc2 = drawnFormats(screen, resources).has(28);
     const bytes = etc2 ? unpackedBytes(screen, resources) : 0;
 
     if (bytes > PRO2_TESTED_BYTES)

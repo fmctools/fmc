@@ -4,6 +4,7 @@
   import { Icon } from "$lib/shared/components/icon";
   import { framesOf, type ImageId, type Layer } from "../../core/document/doc";
   import { frameLabelsOf } from "../../core/document/sources";
+  import { procOf } from "../../core/document/proc";
   import { editorModel } from "../../model";
   import { t, sourcePick } from "../../i18n-inspector";
   import { set } from "./patch";
@@ -38,6 +39,7 @@
 
   // a fresh layer object arrives on every edit, so plain deriveds are enough here
   const images = $derived(framesOf(layer));
+  const proc = $derived(procOf(layer));
   const frameLabels = $derived(frameLabelsOf(layer));
   // the 0x5f body is already decoded on a SlotLayer — no hex to pick apart
   const slotInfo = $derived(
@@ -78,7 +80,7 @@
        on the watch. Listed with its index (and, where the format fixes them, the value
        each slot must hold) and reorderable by drag. -->
   <div class="group">
-    <span class="type-label muted-label">{$t.framesByValue}</span>
+    <span class="type-label muted-label">{proc ? $t.framesBySlot : $t.framesByValue}</span>
     <div class="frames">
       {#each images as ri, i}
         <div
@@ -178,7 +180,7 @@
   </div>
 {/if}
 
-{#if layer.kind === "number" || layer.kind === "image" || frameLabels}
+{#if !proc && (layer.kind === "number" || layer.kind === "image" || frameLabels)}
   <div class="row">
     <Button size="small" kind="secondary" onClick={() => glyphDialogOpened(layer.id)}>
       <Icon name="text_fields" size={18} />

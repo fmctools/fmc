@@ -4,6 +4,7 @@
 // is drawn is where shared/drag.ts hit-tests it.
 import { framesOf, isPlaced, type Doc, type Layer, type NodeId } from "../document/doc";
 import { containerOrigin, findLayer, parentOf } from "../document/edits";
+import { procOf } from "../document/proc";
 import type { LayerHit, Point, Size } from "./canvas";
 import { CENTER, SCREEN } from "./screen";
 
@@ -32,9 +33,10 @@ const hasArt = (l: Layer): boolean =>
   framesOf(l).length > 0 || (l.kind === "group" && l.children.some(hasArt));
 export const isBareRing = (l: Layer): boolean => l.kind === "ring" && !l.frames.length;
 export const resizable = (l: Layer | null): boolean =>
-  Boolean(l) && (hasArt(l!) || isBareRing(l!)) && !l!.locked;
+  // a procedural widget's positions are the firmware's: scaled or turned glyphs would pile up
+  Boolean(l) && (hasArt(l!) || isBareRing(l!)) && !l!.locked && !procOf(l!);
 export const rotatable = (l: Layer | null): boolean =>
-  Boolean(l) && framesOf(l!).length > 0 && !l!.locked;
+  Boolean(l) && framesOf(l!).length > 0 && !l!.locked && !procOf(l!);
 export const rotateHandle = (h: LayerHit): Point => onDisc(h.x + h.w / 2, h.y - HANDLE * 1.5);
 
 export const hitOf = (hits: readonly LayerHit[], id: NodeId | null) =>

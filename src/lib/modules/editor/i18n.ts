@@ -17,6 +17,12 @@ export const t = dict(
     openWatchface: "Open watchface",
     importFolder: "Import export folder",
     addLayersFrom: "Add layers from watchfaces",
+    support: {
+      none: "No supported watch can take this face: it has a widget of an unknown type.",
+      pro3Only: "Watch 3 Pro only: a Watch Pro 2 would restart in a loop on this face.",
+      pro2Converts: "Made for a Watch 3 Pro: for a Watch Pro 2, use Export for Watch Pro 2.",
+      pro2Drops: "Watch 3 Pro. A Watch Pro 2 runs it without the touch widget.",
+    },
     exportBin: "Export .bin",
     exportBinHint: "Export .bin (⌘E)",
     // editor.svelte — toolbar
@@ -205,6 +211,13 @@ export const t = dict(
       openWatchface: "Открыть циферблат",
       importFolder: "Импорт папки экспорта",
       addLayersFrom: "Добавить слои из циферблатов",
+      support: {
+        none: "Ни одни поддерживаемые часы не примут этот циферблат: в нём виджет неизвестного типа.",
+        pro3Only: "Только Watch 3 Pro: Watch Pro 2 на этом циферблате зациклится на перезагрузке.",
+        pro2Converts:
+          "Сделан для Watch 3 Pro: для Watch Pro 2 используйте «Экспорт для Watch Pro 2».",
+        pro2Drops: "Watch 3 Pro. На Watch Pro 2 работает без виджета касания.",
+      },
       exportBin: "Экспорт .bin",
       exportBinHint: "Экспорт .bin (⌘E)",
       nameHint: "Название циферблата — в списке на часах видны первые 15 символов",
@@ -375,6 +388,14 @@ export const t = dict(
       openWatchface: "Відкрити циферблат",
       importFolder: "Імпорт теки експорту",
       addLayersFrom: "Додати шари з циферблатів",
+      support: {
+        none: "Жоден підтримуваний годинник не прийме цей циферблат: у ньому віджет невідомого типу.",
+        pro3Only:
+          "Лише Watch 3 Pro: Watch Pro 2 на цьому циферблаті циклічно перезавантажуватиметься.",
+        pro2Converts:
+          "Створено для Watch 3 Pro: для Watch Pro 2 скористайтеся «Експорт для Watch Pro 2».",
+        pro2Drops: "Watch 3 Pro. На Watch Pro 2 працює без віджета дотику.",
+      },
       exportBin: "Експорт .bin",
       exportBinHint: "Експорт .bin (⌘E)",
       nameHint: "Назва циферблата — у списку на годиннику видно перші 15 символів",
@@ -545,6 +566,13 @@ export const t = dict(
       openWatchface: "Abrir esfera",
       importFolder: "Importar carpeta exportada",
       addLayersFrom: "Añadir capas de esferas",
+      support: {
+        none: "Ningún reloj compatible acepta esta esfera: tiene un widget de tipo desconocido.",
+        pro3Only: "Solo Watch 3 Pro: un Watch Pro 2 se reiniciaría en bucle con esta esfera.",
+        pro2Converts:
+          "Hecha para el Watch 3 Pro: para un Watch Pro 2 usa «Exportar para Watch Pro 2».",
+        pro2Drops: "Watch 3 Pro. En un Watch Pro 2 funciona sin el widget táctil.",
+      },
       exportBin: "Exportar .bin",
       exportBinHint: "Exportar .bin (⌘E)",
       nameHint: "Nombre de la esfera: la lista del reloj muestra los primeros 15 caracteres",
@@ -715,6 +743,13 @@ export const t = dict(
       openWatchface: "वॉच फ़ेस खोलें",
       importFolder: "एक्सपोर्ट फ़ोल्डर इम्पोर्ट करें",
       addLayersFrom: "वॉच फ़ेस से लेयर जोड़ें",
+      support: {
+        none: "कोई समर्थित घड़ी यह फ़ेस नहीं ले सकती: इसमें अज्ञात टाइप का विजेट है।",
+        pro3Only: "सिर्फ़ Watch 3 Pro: Watch Pro 2 इस फ़ेस पर बार-बार रीस्टार्ट होगी।",
+        pro2Converts:
+          "Watch 3 Pro के लिए बना है: Watch Pro 2 के लिए “Watch Pro 2 के लिए एक्सपोर्ट” इस्तेमाल करें।",
+        pro2Drops: "Watch 3 Pro। Watch Pro 2 पर यह टच विजेट के बिना चलता है।",
+      },
       exportBin: ".bin एक्सपोर्ट",
       exportBinHint: ".bin एक्सपोर्ट (⌘E)",
       nameHint: "वॉच फ़ेस का नाम — घड़ी की सूची में पहले 15 अक्षर दिखते हैं",

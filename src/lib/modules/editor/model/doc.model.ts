@@ -18,6 +18,7 @@ import {
   type NodeId,
 } from "../core/document/doc";
 import { screenMemory, TAG, type ScreenMemory } from "../core/format";
+import { watchSupport, type Support } from "../core/document/support";
 
 interface History {
   readonly undo: readonly Doc[];
@@ -54,6 +55,9 @@ export const $memory = $doc.map((doc): Partial<Record<"main" | "aod", ScreenMemo
     face.screens.map((s) => [s.tag === TAG.aod ? "aod" : "main", screenMemory(s, face.resources)]),
   );
 });
+
+/** Where the face can go (core/document/support.ts). ponytail: as costly as $memory, same cure. */
+export const $support = $doc.map((doc): Support => (doc ? watchSupport(doc) : null));
 
 // ---- events ----
 /** Checkpoint, then edit — what every user-visible action fires. */

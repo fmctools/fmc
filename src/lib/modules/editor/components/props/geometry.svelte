@@ -6,6 +6,7 @@
   import { FULL_BLEED_R, type ArcSpec } from "../../core/render/arc";
   import { ringRadius } from "../../core/document/edits";
   import { CENTER } from "../../core/render/screen";
+  import { procOf, RINGS } from "../../core/document/proc";
   import { editorModel } from "../../model";
   import type { AlignDir } from "../../model/edit.model";
   import { num, set } from "./patch";
@@ -38,7 +39,9 @@
     ["bottom", "align_vertical_bottom", $t.alignBottom],
   ]);
 
-  const placed = $derived(isPlaced(layer) ? layer : null);
+  const proc = $derived(procOf(layer));
+  // type 4 has nowhere to go and no other has a size of its own (see edits.ts procPatch)
+  const placed = $derived(isPlaced(layer) && proc?.type !== RINGS ? layer : null);
   const frame = $derived(layer.kind === "group" ? layer.frame : null);
   const hand = $derived(layer.kind === "hand" ? layer : null);
   const ring = $derived(layer.kind === "ring" ? layer : null);
@@ -60,7 +63,7 @@
   const first = $derived.by(() => {
     const ids = framesOf(layer);
 
-    return ids.length ? ($doc?.images.get(ids[0]) ?? null) : null;
+    return ids.length && !proc ? ($doc?.images.get(ids[0]) ?? null) : null;
   });
   const resSize = $derived(first ? { w: first.w, h: first.h } : null);
   // absolute, the way the field reads — the model takes the change (see rotateImageRequested)

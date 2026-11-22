@@ -75,6 +75,7 @@
   const {
     $doc: doc,
     $memory: memory,
+    $support: support,
     $store: store,
     $sim: sim,
     $screen: screen,
@@ -749,6 +750,15 @@
           </div>
         </div>
       </div>
+      {#if $support}
+        <p
+          class="memory support type-caption"
+          class:warn={$support === "pro3Only" || $support === "pro2Converts"}
+          class:error={$support === "none"}
+        >
+          {$t.support[$support]}
+        </p>
+      {/if}
       {#if showMem && screenMem}
         <p
           class="memory type-caption"

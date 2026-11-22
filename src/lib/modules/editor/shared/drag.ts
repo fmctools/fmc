@@ -2,6 +2,7 @@
 // does to a layer's box. Nothing here imports Svelte or the model — the page reads the pointer,
 // calls these, and fires the model event the result names.
 import { framesOf, type Doc, type Layer, type NodeId } from "../core/document/doc";
+import { procOf, RINGS } from "../core/document/proc";
 import type { LayerHit, Point, Size } from "../core/render/canvas";
 import type { ResizePreview } from "../core/render/render";
 import {
@@ -59,7 +60,7 @@ export type ResizeRequest =
   | { to: "image"; p: { layer: NodeId; w: number; h: number; at?: Point } };
 
 export function dragItem(l: Layer): DragItem | null {
-  if (l.locked) return null;
+  if (l.locked || procOf(l)?.type === RINGS) return null;
   if (l.kind === "group") return { layer: l, x0: l.frame.x, y0: l.frame.y };
   return l.kind === "raw" ? null : { layer: l, x0: l.x, y0: l.y };
 }

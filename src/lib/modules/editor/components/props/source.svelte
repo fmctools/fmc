@@ -22,6 +22,7 @@
   } from "../../core/document/sources";
   import type { ArcSpec } from "../../core/render/arc";
   import { slotBindingOf } from "../../core/document/edits";
+  import { PANELS, procOf, RINGS } from "../../core/document/proc";
   import { SLOT_METRIC_CHOICES } from "../../core/document/factory";
   import { editorModel } from "../../model";
   import { num, set } from "./patch";
@@ -35,6 +36,7 @@
     $screen: screen,
     conditionAdded,
     sourceIdSet,
+    panelSet,
     slotBindSet,
     slotMetricAdded,
     slotMetricRemoved,
@@ -42,7 +44,9 @@
 
   // A fresh layer object arrives on every edit, so these are plain deriveds.
   const placed = $derived(isPlaced(layer) ? layer : null);
-  const meta = $derived(placed?.meta ?? null);
+  const proc = $derived(procOf(layer));
+  // a procedural widget reads what its type reads, and the watch tints none of it
+  const meta = $derived(proc ? null : (placed?.meta ?? null));
   const images = $derived(framesOf(layer));
   const num_ = $derived(layer.kind === "number" ? layer : null);
   const slot = $derived(layer.kind === "slot" ? layer : null);
@@ -156,6 +160,25 @@
     } as Partial<Layer>);
 </script>
 
+{#if proc}
+  <div class="group">
+    {#if proc.type === PANELS && proc.panel >= 1 && proc.panel <= 4}
+      <div class="row">
+        <span class="type-caption field-label w-md">{$t.panel}</span>
+        <Select
+          value={String(proc.panel)}
+          options={[1, 2, 3, 4].map((n) => ({ value: String(n), label: $t.panels[n] }))}
+          onChange={(v) => panelSet({ id: layer.id, panel: Number(v) })}
+        />
+      </div>
+    {:else if proc.type === PANELS && proc.panel === 0}
+      <p class="type-caption hint-xs">{$t.weatherPanel}</p>
+    {/if}
+    <p class="type-caption hint-xs">
+      {proc.type === RINGS ? $t.ringsWidget : $t.procWidget(proc.type)}
+    </p>
+  </div>
+{/if}
 {#if meta}
   <div class="group">
     <!-- a label beside its field, like every other row: a caps label here would read as a

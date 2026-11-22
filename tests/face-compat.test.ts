@@ -168,6 +168,18 @@ describe("ETC2 on a Watch Pro 2", () => {
     await expect(assertWatchCompat(etc2(4), P2, noStub)).rejects.toThrow(/2\.6 MB unpacked/);
   });
 
+  test("also when it isn't the largest frame of its run as stored", async () => {
+    const big = squares(4, 28).map((r) => ({ ...r, w: 464, h: 464 }));
+    // cf 5 at 280x280 outweighs cf 28 at 464x464 until the latter is unpacked
+    const small = squares(4, 5).map((r) => ({ ...r, w: 280, h: 280 }));
+    const bin = faceBin(
+      [0, 2, 4, 6].map((i) => imageNode([i, i + 1])),
+      big.flatMap((r, i) => [r, small[i]]),
+    );
+
+    await expect(assertWatchCompat(bin, P2, noStub)).rejects.toThrow(/2\.6 MB unpacked/);
+  });
+
   test("and left to the budget on a Watch 3 Pro", async () => {
     await expect(assertWatchCompat(etc2(4), P3, noStub)).resolves.toBeUndefined();
   });

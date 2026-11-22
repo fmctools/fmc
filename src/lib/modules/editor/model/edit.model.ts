@@ -24,6 +24,7 @@ import {
   shiftLayer,
   siblingsOf,
   ungroup,
+  withPanel,
   wrapInGroup,
 } from "../core/document/edits";
 import { newCondition, newGroup } from "../core/document/factory";
@@ -103,6 +104,8 @@ export const ringResized = createEvent<{
 }>();
 export const frameMoved = createEvent<{ id: NodeId; from: number; to: number }>();
 export const alignRequested = createEvent<AlignDir>();
+/** Which of DataPulse's lower panels a type 6 widget is. */
+export const panelSet = createEvent<{ id: NodeId; panel: number }>();
 /** meta.source — the data a widget reads. Not a plain patch: value-indexed sources also fix the
  *  widget's frame count. */
 export const sourceIdSet = createEvent<{ id: NodeId; source: number }>();
@@ -664,6 +667,12 @@ sample({
   filter: Boolean,
   fn: ({ cache }) => cache,
   target: cachePatched,
+});
+
+sample({
+  clock: panelSet,
+  fn: ({ id, panel }) => ({ edit: (doc: Doc) => withPanel(doc, id, panel) }),
+  target: committed,
 });
 
 sample({

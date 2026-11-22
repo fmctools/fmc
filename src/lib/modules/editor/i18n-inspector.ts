@@ -62,6 +62,14 @@ const en = {
   shownMetric: "shown metric",
   placeholder: "placeholder",
   placeholderHint: "drawn only on the watch's widget-edit screen",
+  panel: "Panel",
+  framesBySlot: "images · index = place in the widget",
+  weatherPanel: "Weather has 88 images of its own, so it doesn't switch to another panel.",
+  ringsWidget:
+    "Watch 3 Pro widget (type 4): the ring follows the finger around the screen's centre, so the layer doesn't move.",
+  procWidget: (type: number) =>
+    `Watch 3 Pro widget (type ${type}): the watch lays it out itself. Replace its images; their count and size are fixed by the widget.`,
+  panels: ["Weather", "Heart rate", "Blood oxygen", "Stress", "Sleep"],
   framesByValue: "frames · index = value",
   ringArt: "ring art",
   useRingBitmap: "use a ring bitmap",
@@ -275,6 +283,14 @@ export const t = dict(en, {
     shownMetric: "показанная метрика",
     placeholder: "заглушка",
     placeholderHint: "видна только на экране настройки виджетов на часах",
+    panel: "Панель",
+    framesBySlot: "изображения · индекс = место в виджете",
+    weatherPanel: "У погоды свои 88 изображений, поэтому на другую панель она не переключается.",
+    ringsWidget:
+      "Виджет Watch 3 Pro (тип 4): кольцо следует за пальцем вокруг центра экрана, поэтому слой не двигается.",
+    procWidget: (type) =>
+      `Виджет Watch 3 Pro (тип ${type}): часы сами его раскладывают. Изображения можно заменять, их число и размер задаёт виджет.`,
+    panels: ["Погода", "Пульс", "Кислород в крови", "Стресс", "Сон"],
     framesByValue: "кадры · индекс = значение",
     ringArt: "графика кольца",
     useRingBitmap: "задать картинку кольца",
@@ -483,6 +499,14 @@ export const t = dict(en, {
     shownMetric: "показана метрика",
     placeholder: "заглушка",
     placeholderHint: "видно лише на екрані налаштування віджетів на годиннику",
+    panel: "Панель",
+    framesBySlot: "зображення · індекс = місце у віджеті",
+    weatherPanel: "У погоди власні 88 зображень, тому на іншу панель вона не перемикається.",
+    ringsWidget:
+      "Віджет Watch 3 Pro (тип 4): кільце йде за пальцем навколо центра екрана, тому шар не рухається.",
+    procWidget: (type) =>
+      `Віджет Watch 3 Pro (тип ${type}): годинник сам його розкладає. Зображення можна замінювати, їхню кількість і розмір задає віджет.`,
+    panels: ["Погода", "Пульс", "Кисень у крові", "Стрес", "Сон"],
     framesByValue: "кадри · індекс = значення",
     ringArt: "графіка кільця",
     useRingBitmap: "задати зображення кільця",
@@ -691,6 +715,14 @@ export const t = dict(en, {
     shownMetric: "métrica visible",
     placeholder: "marcador",
     placeholderHint: "solo se dibuja en la pantalla de edición de widgets del reloj",
+    panel: "Panel",
+    framesBySlot: "imágenes · índice = lugar en el widget",
+    weatherPanel: "El tiempo tiene 88 imágenes propias, así que no cambia a otro panel.",
+    ringsWidget:
+      "Widget del Watch 3 Pro (tipo 4): el anillo sigue el dedo alrededor del centro de la pantalla, así que la capa no se mueve.",
+    procWidget: (type) =>
+      `Widget del Watch 3 Pro (tipo ${type}): el reloj lo compone por sí mismo. Puedes reemplazar sus imágenes; el número y el tamaño los fija el widget.`,
+    panels: ["Tiempo", "Frecuencia cardíaca", "Oxígeno en sangre", "Estrés", "Sueño"],
     framesByValue: "fotogramas · índice = valor",
     ringArt: "imagen del anillo",
     useRingBitmap: "usar imagen de anillo",
@@ -899,6 +931,14 @@ export const t = dict(en, {
     shownMetric: "दिखने वाला मीट्रिक",
     placeholder: "प्लेसहोल्डर",
     placeholderHint: "सिर्फ़ घड़ी की विजेट-एडिट स्क्रीन पर दिखता है",
+    panel: "पैनल",
+    framesBySlot: "इमेज · इंडेक्स = विजेट में जगह",
+    weatherPanel: "मौसम की अपनी 88 इमेज हैं, इसलिए यह दूसरे पैनल में नहीं बदलता।",
+    ringsWidget:
+      "Watch 3 Pro विजेट (टाइप 4): रिंग स्क्रीन के केंद्र के चारों ओर उंगली के साथ चलती है, इसलिए लेयर नहीं हिलती।",
+    procWidget: (type) =>
+      `Watch 3 Pro विजेट (टाइप ${type}): घड़ी इसका लेआउट खुद बनाती है। इमेज बदली जा सकती हैं; उनकी संख्या और साइज़ विजेट तय करता है।`,
+    panels: ["मौसम", "हृदय गति", "ब्लड ऑक्सीजन", "तनाव", "नींद"],
     framesByValue: "फ़्रेम · इंडेक्स = मान",
     ringArt: "रिंग आर्ट",
     useRingBitmap: "रिंग इमेज लगाएं",
