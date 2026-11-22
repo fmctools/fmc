@@ -757,29 +757,31 @@
           </div>
         </div>
       </div>
-      {#if $support}
-        <p
-          class="memory support type-caption"
-          class:warn={$support === "pro3Only" || $support === "pro2Converts"}
-          class:error={$support === "none"}
-        >
-          {$t.support[$support]}
-        </p>
-      {/if}
-      {#if showMem && screenMem}
-        <p
-          class="memory type-caption"
-          class:warn={screenMem.fit === "compressed"}
-          class:error={screenMem.fit === "too-heavy"}
-          title={$t.memoryHint(mb(SCREEN_BUDGET))}
-        >
-          {$t.memory(mb(screenMem.bytes), mb(SCREEN_BUDGET))}{screenMem.fit === "compressed"
-            ? ` — ${$t.memoryCompressed}`
-            : screenMem.fit === "too-heavy"
-              ? ` — ${$t.memoryTooHeavy}`
-              : ""}
-        </p>
-      {/if}
+      <div class="notes">
+        {#if $support}
+          <p
+            class="memory support type-caption"
+            class:warn={$support === "pro3Only" || $support === "pro2Converts"}
+            class:error={$support === "none"}
+          >
+            {$t.support[$support]}
+          </p>
+        {/if}
+        {#if showMem && screenMem}
+          <p
+            class="memory type-caption"
+            class:warn={screenMem.fit === "compressed"}
+            class:error={screenMem.fit === "too-heavy"}
+            title={$t.memoryHint(mb(SCREEN_BUDGET))}
+          >
+            {$t.memory(mb(screenMem.bytes), mb(SCREEN_BUDGET))}{screenMem.fit === "compressed"
+              ? ` — ${$t.memoryCompressed}`
+              : screenMem.fit === "too-heavy"
+                ? ` — ${$t.memoryTooHeavy}`
+                : ""}
+          </p>
+        {/if}
+      </div>
       {#if perf && $doc}
         <p class="fps type-caption type-mono" class:slow={fps > 0 && fps < 50}>
           {fps} fps · {drawMs} ms draw
@@ -1233,12 +1235,25 @@
     }
   }
 
-  /* the open screen's share of a Watch 3 Pro's memory, over the canvas's top edge */
-  .memory {
+  /* where the face can go and the open screen's share of a Watch 3 Pro's memory, stacked over
+     the canvas's top edge */
+  .notes {
     position: absolute;
     top: 0.5rem;
     inset-inline-end: 0.5rem;
     z-index: 2;
+    display: flex;
+    max-width: calc(100% - 1rem);
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+  }
+  @media (max-width: 767px) {
+    .notes {
+      top: 3.5rem; /* under the floating Main/AOD switch */
+    }
+  }
+  .memory {
     margin: 0;
     padding: 0.125rem 0.5rem;
     border-radius: calc(var(--border-radius) - 0.25rem);
