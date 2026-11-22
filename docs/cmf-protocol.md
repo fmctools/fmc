@@ -247,9 +247,13 @@ The layout is in `core/render/proc-scene.ts`. Where each type may be installed i
   struct (18 bytes, no 2 bytes of padding) followed by a condition does have one as far as the
   firmware is concerned, and boot-loops it: keep the `0000` tail.
 
-A Watch Pro 2 is also refused any cf 14 (A8) resource, the thumbnail included, until A8 has been
-seen on a real one: the emulator stops on faces that use it. Export for Watch Pro 2 re-encodes it as
-cf 5.
+A Watch Pro 2 never gets a cf 14 (A8) resource as it is, the thumbnail included, until A8 has been
+seen on a real one: the emulator stops on faces that use it. `fitForWatch` re-encodes A8 and ETC2 as
+cf 5 on the way to a Pro 2 (and Export for Watch Pro 2 in a file), as long as every screen then stays
+within the 1.955 MB tested there; the gate refuses the rest.
+
+A Watch Pro 2 draws types 4..7 with the stub release planned as 11 (cmf-watch-sdk); until it is out
+and tried on a real watch, `PRO2_FACES_STUB` keeps them off every Pro 2.
 
 Sources only a Watch 3 Pro has run 0x8e..0x9d. Known: `0x93` the minutes of last night's sleep,
 `0x99` the number of the face's colour theme. A themed layer (meta[7] = 4) takes the theme the

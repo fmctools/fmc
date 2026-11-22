@@ -51,6 +51,7 @@
     $bleStatus: bleStatus,
     $connecting: connecting,
     $fitNote: fitNote,
+    $convertNote: convertNote,
     connectRequested,
   } = bleModel;
 
@@ -217,6 +218,8 @@
             </div>
             {#if $installed && $fitNote}
               <p class="fit-note type-caption">{$deviceT.fitNote($fitNote)}</p>
+            {:else if $installed && $convertNote}
+              <p class="fit-note type-caption">{$deviceT.convertNote($convertNote)}</p>
             {/if}
             <div class="secondary">
               <Button kind="secondary" onClick={() => editRequested(wf)}>

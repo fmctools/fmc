@@ -74,6 +74,8 @@ const en = {
     `this face has a widget of type ${type}, which no supported watch knows — it can restart a watch in a loop. Nothing was sent to the watch.`,
   widgetUnsupported: (type: string) =>
     `this face has a Watch 3 Pro widget (type ${type}) that this watch's firmware can't draw — the watch would restart in a loop. Nothing was sent to the watch.`,
+  a8TooHeavy: (need: string, max: string) =>
+    `this face has A8 images (cf 14), and converted for a Watch Pro 2 a screen needs ${need} MB, over the ${max} MB tested there — the watch could restart in a loop. Nothing was sent to the watch.`,
   a8Untested:
     "this face has A8 images (cf 14), which haven't been tested on a Watch Pro 2. Open it in the editor, use Export for Watch Pro 2 and install the exported file. Nothing was sent to the watch.",
   etc2OverTested: (need: string, max: string) =>
@@ -187,6 +189,8 @@ export const bt = dict(en, {
       `в этом циферблате виджет типа ${type}, его не знают ни одни поддерживаемые часы — от него часы могут зациклиться на перезагрузке. На часы ничего не отправлено.`,
     widgetUnsupported: (type) =>
       `в этом циферблате виджет Watch 3 Pro (тип ${type}), который прошивка этих часов не умеет рисовать — часы зациклятся на перезагрузке. На часы ничего не отправлено.`,
+    a8TooHeavy: (need, max) =>
+      `в этом циферблате изображения A8 (cf 14), и после перевода для Watch Pro 2 экрану нужно ${need} МБ, а проверено только до ${max} МБ — часы могут зациклиться на перезагрузке. На часы ничего не отправлено.`,
     a8Untested:
       "в этом циферблате изображения A8 (cf 14), их работа на Watch Pro 2 не проверена. Откройте его в редакторе, выберите «Экспорт для Watch Pro 2» и установите полученный файл. На часы ничего не отправлено.",
     etc2OverTested: (need, max) =>
@@ -296,6 +300,8 @@ export const bt = dict(en, {
       `у цьому циферблаті віджет типу ${type}, його не знає жоден підтримуваний годинник — через нього годинник може циклічно перезавантажуватися. На годинник нічого не надіслано.`,
     widgetUnsupported: (type) =>
       `у цьому циферблаті віджет Watch 3 Pro (тип ${type}), який прошивка цього годинника не вміє малювати — годинник циклічно перезавантажуватиметься. На годинник нічого не надіслано.`,
+    a8TooHeavy: (need, max) =>
+      `у цьому циферблаті зображення A8 (cf 14), і після переведення для Watch Pro 2 екрану потрібно ${need} МБ, а перевірено лише до ${max} МБ — годинник може циклічно перезавантажуватися. На годинник нічого не надіслано.`,
     a8Untested:
       "у цьому циферблаті зображення A8 (cf 14), їхню роботу на Watch Pro 2 не перевірено. Відкрийте його в редакторі, виберіть «Експорт для Watch Pro 2» і встановіть отриманий файл. На годинник нічого не надіслано.",
     etc2OverTested: (need, max) =>
@@ -405,6 +411,8 @@ export const bt = dict(en, {
       `esta esfera tiene un widget de tipo ${type} que ningún reloj compatible conoce — puede dejar el reloj reiniciándose en bucle. No se envió nada al reloj.`,
     widgetUnsupported: (type) =>
       `esta esfera tiene un widget del Watch 3 Pro (tipo ${type}) que el firmware de este reloj no sabe dibujar — el reloj se reiniciaría en bucle. No se envió nada al reloj.`,
+    a8TooHeavy: (need, max) =>
+      `esta esfera tiene imágenes A8 (cf 14) y, convertidas para un Watch Pro 2, una pantalla necesita ${need} MB, más de los ${max} MB probados allí — el reloj podría reiniciarse en bucle. No se envió nada al reloj.`,
     a8Untested:
       "esta esfera tiene imágenes A8 (cf 14), que no se han probado en un Watch Pro 2. Ábrela en el editor, usa «Exportar para Watch Pro 2» e instala el archivo exportado. No se envió nada al reloj.",
     etc2OverTested: (need, max) =>
@@ -516,6 +524,8 @@ export const bt = dict(en, {
       `इस फ़ेस में टाइप ${type} का विजेट है, जिसे कोई समर्थित घड़ी नहीं पहचानती — इससे घड़ी बार-बार रीस्टार्ट हो सकती है। घड़ी पर कुछ नहीं भेजा गया।`,
     widgetUnsupported: (type) =>
       `इस फ़ेस में Watch 3 Pro का विजेट (टाइप ${type}) है, जिसे इस घड़ी का फ़र्मवेयर नहीं दिखा सकता — घड़ी बार-बार रीस्टार्ट होती रहेगी। घड़ी पर कुछ नहीं भेजा गया।`,
+    a8TooHeavy: (need, max) =>
+      `इस फ़ेस में A8 इमेज (cf 14) हैं, और Watch Pro 2 के लिए बदलने पर स्क्रीन को ${need} MB चाहिए, जो वहाँ जाँची गई ${max} MB सीमा से ज़्यादा है — घड़ी बार-बार रीस्टार्ट हो सकती है। घड़ी पर कुछ नहीं भेजा गया।`,
     a8Untested:
       "इस फ़ेस में A8 इमेज (cf 14) हैं, जिन्हें Watch Pro 2 पर जाँचा नहीं गया है। इसे एडिटर में खोलें, “Watch Pro 2 के लिए एक्सपोर्ट” चुनें और एक्सपोर्ट की गई फ़ाइल इंस्टॉल करें। घड़ी पर कुछ नहीं भेजा गया।",
     etc2OverTested: (need, max) =>
@@ -631,6 +641,10 @@ const RULES: Rule[] = [
   ],
   [/^this face has a widget of type (\d+), /, (w, m) => w.widgetUnknown(m[1])],
   [/^this face has a Watch 3 Pro widget \(type (\d+)\)/, (w, m) => w.widgetUnsupported(m[1])],
+  [
+    /^this face has A8 images \(cf 14\), and converted for a Watch Pro 2 a screen needs ([\d.]+) MB, over the ([\d.]+) MB/,
+    (w, m) => w.a8TooHeavy(m[1], m[2]),
+  ],
   lit("a8Untested"),
   [
     /^this face's ETC2 images need ([\d.]+) MB unpacked on a Watch Pro 2, over the ([\d.]+) MB/,

@@ -189,9 +189,22 @@ describe("ETC2 on a Watch Pro 2", () => {
 describe("A8 (cf 14) on a Watch Pro 2", () => {
   const a8 = () => faceBin([imageNode([0])], squares(1, 14));
 
-  test("is refused, with the way out", async () => {
+  // fitForWatch converts it first; this is the gate behind it
+  test("is refused as it is, with the way out", async () => {
     await expect(assertWatchCompat(a8(), P2, noStub)).rejects.toThrow(
       /A8 images \(cf 14\).*Export for Watch Pro 2/,
+    );
+  });
+
+  test("too heavy to convert says so", async () => {
+    const heavy = squares(4, 14).map((r) => ({ ...r, w: 464, h: 464 }));
+    const bin = faceBin(
+      [0, 1, 2, 3].map((i) => imageNode([i])),
+      heavy,
+    );
+
+    await expect(assertWatchCompat(bin, P2, noStub)).rejects.toThrow(
+      /A8 images \(cf 14\).*2\.6 MB.*1\.96 MB/,
     );
   });
 

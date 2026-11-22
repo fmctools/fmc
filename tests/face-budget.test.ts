@@ -108,7 +108,7 @@ test("an opaque RGB565+alpha image is stored as RGB565, pixel for pixel", () => 
 test("a face with nothing to change comes back as the same bytes", () => {
   const bin = read("Pro3__SlopeTime.bin");
 
-  expect(fitForWatch(bin, "watch_3_pro")).toEqual({ bin, compressed: 0 });
+  expect(fitForWatch(bin, "watch_3_pro")).toEqual({ bin, compressed: 0, converted: 0 });
 });
 
 describe("screenMemory — what the editor shows against the budget", () => {

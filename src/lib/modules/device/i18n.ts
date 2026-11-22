@@ -132,6 +132,8 @@ export const t = dict(
     help: helpEn,
     backToFaces: "Back to the watchfaces",
     // after a flash that had to compress images (bleModel.$fitNote)
+    convertNote: (n: number) =>
+      `${n} ${n === 1 ? "image was" : "images were"} converted to a format the Watch Pro 2 draws — Watch 3 Pro images it can't show as they are.`,
     fitNote: (n: number) =>
       `${n} ${n === 1 ? "image was" : "images were"} compressed to fit the watch's memory — they can look slightly softer than in the editor.`,
   },
@@ -252,6 +254,8 @@ export const t = dict(
       helpTitle: "Перед подключением — FMC",
       helpDescription:
         "Что FMC делает с вашими часами CMF, чего он не умеет и как решить конфликт Bluetooth с приложением Nothing X.",
+      convertNote: (n) =>
+        `${n} ${plural("ru", n, { one: "изображение переведено", few: "изображения переведены", many: "изображений переведено" })} в формат, который рисует Watch Pro 2: в исходном формате Watch 3 Pro эти часы их не показывают.`,
       fitNote: (n: number) =>
         `${n} ${plural("ru", n, { one: "изображение сжато", few: "изображения сжаты", many: "изображений сжато" })}, чтобы циферблат поместился в память часов — на часах они могут выглядеть чуть мягче, чем в редакторе.`,
       help: helpRu,
@@ -375,6 +379,8 @@ export const t = dict(
       helpTitle: "Перед підключенням — FMC",
       helpDescription:
         "Що FMC робить з вашим годинником CMF, чого він не вміє і як усунути конфлікт Bluetooth із застосунком Nothing X.",
+      convertNote: (n) =>
+        `${n} ${plural("uk", n, { one: "зображення переведено", few: "зображення переведено", many: "зображень переведено" })} у формат, який малює Watch Pro 2: у вихідному форматі Watch 3 Pro цей годинник їх не показує.`,
       fitNote: (n: number) =>
         `${n} ${plural("uk", n, { one: "зображення стиснуто", few: "зображення стиснуто", many: "зображень стиснуто" })}, щоб циферблат помістився в пам'ять годинника — на годиннику вони можуть виглядати трохи м'якше, ніж у редакторі.`,
       help: helpUk,
@@ -499,6 +505,8 @@ export const t = dict(
       helpTitle: "Antes de conectar — FMC",
       helpDescription:
         "Qué le hace FMC a tu reloj CMF, qué no puede hacer y cómo resolver el conflicto de Bluetooth con la app Nothing X.",
+      convertNote: (n) =>
+        `${n} ${plural("es", n, { one: "imagen se convirtió", other: "imágenes se convirtieron" })} a un formato que el Watch Pro 2 dibuja: en el formato original del Watch 3 Pro no las muestra.`,
       fitNote: (n: number) =>
         `${n} ${plural("es", n, { one: "imagen se comprimió", other: "imágenes se comprimieron" })} para que la esfera quepa en la memoria del reloj — pueden verse algo más suaves que en el editor.`,
       help: helpEs,
@@ -618,6 +626,8 @@ export const t = dict(
       helpTitle: "कनेक्ट करने से पहले — FMC",
       helpDescription:
         "FMC आपकी CMF घड़ी के साथ क्या करता है, क्या नहीं कर सकता, और Nothing X ऐप के साथ Bluetooth की टक्कर कैसे ठीक करें।",
+      convertNote: (n) =>
+        `${n} इमेज ऐसे फ़ॉर्मेट में बदली गईं जिसे Watch Pro 2 दिखाता है: Watch 3 Pro के मूल फ़ॉर्मेट में यह घड़ी उन्हें नहीं दिखाती।`,
       fitNote: (n: number) =>
         `घड़ी की मेमोरी में फ़ेस फ़िट करने के लिए ${n} इमेज कंप्रेस की गईं — घड़ी पर वे एडिटर से थोड़ी धुंधली दिख सकती हैं।`,
       help: helpHi,
