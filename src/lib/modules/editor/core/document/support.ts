@@ -3,12 +3,11 @@
 // note can't promise what the gate then refuses.
 import { buildBin } from "../format";
 import { drawnFormats, isUnknownWidget, procWidgets, stockSafe } from "../format/compat";
+export { PRO2_CONVERTS } from "../format/compat";
 import { toLegacy, type Doc, type Layer } from "./doc";
 
 /** The colour theme's number: a source only a Watch 3 Pro answers. */
 export const THEME_SOURCE = 0x99;
-/** What the export re-encodes: A8 (not sent to a Watch Pro 2) and ETC2 (stock doesn't show it). */
-export const PRO2_CONVERTS = [14, 28];
 
 /**
  * `none`: a widget no watch knows. `pro3Only`: one a Watch Pro 2 would boot-loop on.

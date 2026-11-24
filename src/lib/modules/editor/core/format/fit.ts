@@ -3,6 +3,7 @@
 
 import { buildBin, parseBin } from "./bin";
 import { decodedBytes, overBudget, shownResources, TO_ETC2 } from "./budget";
+import { PRO2_CONVERTS, PRO2_TESTED_BYTES, unpackedBytes } from "./compat";
 import { decodePixels, encodePixels } from "./pixels-codec";
 import type { Resource } from "./raw";
 
@@ -30,6 +31,8 @@ function dropOpaqueAlpha(r: Resource): Resource {
 export interface Fitted {
   bin: Uint8Array;
   compressed: number;
+  /** Images a Watch Pro 2 gets as cf 4/5 instead of A8 or ETC2. */
+  converted: number;
 }
 
 export function fitForWatch(bin: Uint8Array, device: string | null): Fitted {
@@ -38,16 +41,30 @@ export function fitForWatch(bin: Uint8Array, device: string | null): Fitted {
   try {
     face = parseBin(bin);
   } catch {
-    return { bin, compressed: 0 };
+    return { bin, compressed: 0, converted: 0 };
   }
   let changed = false,
-    compressed = 0;
+    compressed = 0,
+    converted = 0;
   const swap = (i: number, r: Resource) => {
     if (r === face.resources[i]) return;
     face.resources[i] = r;
     changed = true;
   };
 
+  // A Watch Pro 2 gets the Watch 3 Pro's formats as cf 5 — what Export for Watch Pro 2 does by
+  // hand, the thumbnail included — unless a screen would then need more than it has been tested
+  // with; the gate refuses that face (compat.ts). First, so an opaque one goes on to cf 4.
+  if (
+    device === "watch_pro_2" &&
+    face.resources.some((r) => PRO2_CONVERTS.includes(r.cf)) &&
+    face.screens.every((s) => unpackedBytes(s, face.resources) <= PRO2_TESTED_BYTES)
+  )
+    face.resources.forEach((r, i) => {
+      if (!PRO2_CONVERTS.includes(r.cf)) return;
+      swap(i, encodePixels(decodePixels(r)!, r.w, r.h, 5));
+      converted++;
+    });
   face.resources.forEach((r, i) => swap(i, dropOpaqueAlpha(r)));
   if (device === "watch_3_pro")
     for (const { screen } of overBudget(face)) {
@@ -63,7 +80,7 @@ export function fitForWatch(bin: Uint8Array, device: string | null): Fitted {
         compressed++;
       }
     }
-  return { bin: changed ? buildBin(face) : bin, compressed };
+  return { bin: changed ? buildBin(face) : bin, compressed, converted };
 }
 
 /** fitForWatch in a worker (fit.worker.ts), so the page stays responsive while a heavy face is
@@ -75,10 +92,19 @@ export function fitForWatchOffThread(bin: Uint8Array, device: string | null): Pr
   return new Promise<Fitted>((resolve, reject) => {
     worker.onmessage = ({
       data,
-    }: MessageEvent<{ out?: Uint8Array | null; compressed?: number; error?: string }>) =>
+    }: MessageEvent<{
+      out?: Uint8Array | null;
+      compressed?: number;
+      converted?: number;
+      error?: string;
+    }>) =>
       data.error
         ? reject(new Error(data.error))
-        : resolve({ bin: data.out ?? bin, compressed: data.compressed ?? 0 });
+        : resolve({
+            bin: data.out ?? bin,
+            compressed: data.compressed ?? 0,
+            converted: data.converted ?? 0,
+          });
     worker.onerror = (e) => {
       e.preventDefault();
       reject(new Error(e.message || "the face could not be prepared for the watch"));

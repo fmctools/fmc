@@ -111,10 +111,9 @@ Every watchface install ends in `flashFx` (`ble.model`): `fitForWatch`, `assertF
 `assertWatchCompat` (`core/format/compat.ts`) on the bytes that go out. The last one reads the raw
 file as the firmware's parser does, because a wrong verdict is a boot loop: never move it onto
 `parseBin`'s tree, and don't add a way to send a face around it. `PRO2_FACES_STUB` stays null
-until a stub release that draws types 4..7 has its number reserved in cmf-watch-sdk and is tried
-on a real watch, and a Watch Pro 2 gets no cf 14 until that is seen working on one. A procedural
-layer's rules (fixed image count, type 4 doesn't move, no rescale) live in `edits.ts` `procPatch`
-and `overlay.ts` `resizable`.
+until the stub release that draws types 4..7 (planned as 11) is out and tried on a real watch, and a Watch Pro 2 gets no cf 14 as it is until that is seen working on one
+(`fitForWatch` converts it, with ETC2, to cf 5 on the way). A procedural layer's rules (fixed image
+count, type 4 doesn't move, no rescale) live in `edits.ts` `procPatch` and `overlay.ts` `resizable`.
 
 `Face`/`FaceNode` are the file's own shape, not the editor's: `parseBin` produces them,
 `fromLegacy` turns them into a `Doc`, `toLegacy` turns one back, and the importers build them

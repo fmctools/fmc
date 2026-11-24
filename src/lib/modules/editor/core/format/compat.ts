@@ -18,8 +18,8 @@ import type { FaceNode, Resource } from "./raw";
 import { TAG, u16 } from "./raw";
 
 /** The stub release that draws types 4..7 on a Watch Pro 2, or null while none has shipped: then
- *  no Pro 2 gets them and nobody asks for its stub. Set it only once the number is reserved in
- *  cmf-watch-sdk and tried on a real watch — two branches there have both called themselves 9. */
+ *  no Pro 2 gets them and nobody asks for its stub. Planned as stub 11 (9 is the boot guard, 10 the
+ *  widget templates); set it to 11 only once that release is out and tried on a real watch. */
 export const PRO2_FACES_STUB: number | null = null;
 
 /** Decoded bytes a screen is known to load on a Watch Pro 2.
@@ -119,12 +119,16 @@ export function drawnFormats(screen: FaceNode, resources: Resource[]): Set<numbe
   return formats;
 }
 
-/** Bytes a screen takes with its ETC2 images unpacked to cf 5, which is how a Watch Pro 2 holds
- *  them (stub 10 does it on load, FMC's export does it in the file). */
+/** The Watch 3 Pro's formats a Watch Pro 2 gets as cf 5: A8 (never sent as it is) and ETC2 (stock
+ *  doesn't draw it). fitForWatch converts them on the way, Export for Watch Pro 2 in a file. */
+export const PRO2_CONVERTS = [14, 28];
+
+/** Bytes a screen takes with those formats as cf 5, which is how a Watch Pro 2 holds them (stub
+ *  10 unpacks ETC2 on load, FMC converts both before they go). */
 export const unpackedBytes = (screen: FaceNode, resources: Resource[]) =>
   screenBytes(
     screen,
-    resources.map((r) => (r.cf === 28 ? { ...r, cf: 5 } : r)),
+    resources.map((r) => (PRO2_CONVERTS.includes(r.cf) ? { ...r, cf: 5 } : r)),
   );
 
 /**
@@ -162,13 +166,19 @@ export async function assertWatchCompat(
   // stock those images don't show at all
   const { screens, resources } = parseBin(bin);
 
-  // unknown on a real watch, and no stub converts it. Every resource counts, the thumbnail (the
-  // face picker draws it there too) and whatever the tree walk can't place: unknown means refused.
+  // unknown on a real watch, so it never goes as it is: fitForWatch converts it, and what reaches
+  // this is a face too heavy to convert. Every resource counts, the thumbnail (the face picker
+  // draws it there too) and whatever the tree walk can't place: unknown means refused.
   // ponytail: lift it, or narrow it to the thumbnail, once cf 14 has been seen on a Watch Pro 2.
-  if (resources.some((r) => r.cf === 14))
+  if (resources.some((r) => r.cf === 14)) {
+    const need = Math.max(...screens.map((s) => unpackedBytes(s, resources)));
+
     throw new Error(
-      "this face has A8 images (cf 14), which haven't been tested on a Watch Pro 2. Open it in the editor, use Export for Watch Pro 2 and install the exported file. Nothing was sent to the watch.",
+      need > PRO2_TESTED_BYTES
+        ? `this face has A8 images (cf 14), and converted for a Watch Pro 2 a screen needs ${(need / 1e6).toFixed(1)} MB, over the ${(PRO2_TESTED_BYTES / 1e6).toFixed(2)} MB tested there — the watch could restart in a loop. Nothing was sent to the watch.`
+        : "this face has A8 images (cf 14), which haven't been tested on a Watch Pro 2. Open it in the editor, use Export for Watch Pro 2 and install the exported file. Nothing was sent to the watch.",
     );
+  }
 
   for (const screen of screens) {
     const etc2 = drawnFormats(screen, resources).has(28);

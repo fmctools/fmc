@@ -64,6 +64,8 @@ export const $sizeWarning = createStore<string | null>(null);
 // how many images a flash re-encoded to fit the watch (fitForWatch) — null when none; the UI
 // words it (device/i18n fitNote)
 export const $fitNote = createStore<number | null>(null);
+// how many A8/ETC2 images a flash re-encoded for a Watch Pro 2 (fitForWatch) — null when none
+export const $convertNote = createStore<number | null>(null);
 // the watch a flash went to: $bleInfo resets the moment the link drops, which is before a flash
 // cut off by that drop fails — so the outcome reads who it was from here, not from $bleInfo
 const $flashWatch = createStore<WatchInfo | null>(null);
@@ -125,7 +127,7 @@ export const $connecting = connectFx.pending;
 const flashFx = createEffect(async ({ bin: file, preview, key, slot, confirmed }: Pending) => {
   // every install — editor and marketplace — comes through here, so this is the one gate
   const device = watchDevice(watch!.name);
-  const { bin, compressed } = await fitForWatchOffThread(file, device);
+  const { bin, compressed, converted } = await fitForWatchOffThread(file, device);
 
   assertFlashable(bin, device);
   await assertWatchCompat(bin, device, async () => (await watch!.readWp2())?.stub.version ?? null);
@@ -140,7 +142,7 @@ const flashFx = createEffect(async ({ bin: file, preview, key, slot, confirmed }
   rememberDial(id, name, preview, watch!.serial);
   // …and only now does the merged dial list know about it, so refresh it
   watch!.mergeDials();
-  return { id, compressed };
+  return { id, compressed, converted };
 });
 export const $flashing = flashFx.pending;
 const removeDialFx = createEffect((id: number) => {
@@ -346,7 +348,12 @@ sample({
   fn: ({ compressed }) => compressed || null,
   target: $fitNote,
 });
-reset({ clock: [flashRequested, disconnected], target: $fitNote });
+sample({
+  clock: flashFx.doneData,
+  fn: ({ converted }) => converted || null,
+  target: $convertNote,
+});
+reset({ clock: [flashRequested, disconnected], target: [$fitNote, $convertNote] });
 
 sample({
   clock: flashFx.failData,

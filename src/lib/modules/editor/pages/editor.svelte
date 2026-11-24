@@ -65,6 +65,7 @@
     flashRequested,
     $flashing: flashing,
     $fitNote: fitNote,
+    $convertNote: convertNote,
   } = bleModel;
   const {
     $openedWf: openedWf,
@@ -724,6 +725,8 @@
     </p>
   {:else if $fitNote}
     <p class="statusbar type-caption">{$deviceT.fitNote($fitNote)}</p>
+  {:else if $convertNote}
+    <p class="statusbar type-caption">{$deviceT.convertNote($convertNote)}</p>
   {/if}
 
   <div class="layout">
