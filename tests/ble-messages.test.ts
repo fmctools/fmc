@@ -59,6 +59,9 @@ test("the reasons inside a sentence are translated, and the error prefix survive
   expect(bleText(w, "can't install this package: body checksum")).toBe(
     "no se puede instalar este paquete: suma de comprobación de los datos",
   );
+  expect(bleText(w, "can't install this package: broken widget icon trailer")).toBe(
+    "no se puede instalar este paquete: bloque de iconos del widget dañado",
+  );
   expect(bleText(w, "uploading “Dots”… 42%")).toBe("enviando «Dots»… 42%");
   expect(bleText(w, "something nobody wrote a rule for")).toBe("something nobody wrote a rule for");
   i18nModel.localePicked("en");
