@@ -292,23 +292,69 @@ sample({
   target: committed,
 });
 
-// ponytail: the copy shares its assets with the original, so resize/adjust/invert on one hits
-// both. Splitting them means cloning every frame — do it if that ever surprises anyone.
+const duplicated = createEvent<{
+  edit: (doc: Doc) => Doc;
+  added: NodeId;
+  cache: Map<ImageId, ImageCache>;
+}>();
+
+sample({
+  clock: duplicated,
+  fn: ({ edit }) => ({ edit }),
+  target: committed,
+});
+sample({
+  clock: duplicated,
+  fn: ({ added }) => ({ added }),
+  target: selectAdded,
+});
+sample({
+  clock: duplicated,
+  filter: ({ cache }) => cache.size > 0,
+  fn: ({ cache }) => cache,
+  target: cachePatched,
+});
+
+// Duplicates own their image assets, so adjustments to either layer stay independent.
 sample({
   clock: duplicateRequested,
-  source: $selected,
-  filter: (selected) => selected.length > 0,
+  source: { selected: $selected, doc: $doc, cache: $cache },
+  filter: ({ selected, doc }) => selected.length > 0 && Boolean(doc),
   // cloned here rather than inside the edit so the new ids are known now and the selection can
   // move to the copy, the way duplicating in any editor behaves
-  fn: (selected) => {
-    const copies = selected.map(cloneLayer);
+  fn: ({ selected, doc, cache }) => {
+    const images = new Map<ImageId, ImageAsset>();
+    const cached = new Map<ImageId, ImageCache>();
+    const copies = selected.map((layer) => {
+      const copy = cloneLayer(layer);
+      const remap = new Map<ImageId, ImageId>();
+
+      for (const id of assetsOf(layer)) {
+        const asset = doc!.images.get(id);
+
+        if (!asset) continue;
+        const fresh = newImageId();
+
+        remap.set(id, fresh);
+        images.set(fresh, { ...asset, id: fresh, data: asset.data.slice() });
+        const imageCache = cache.get(id);
+
+        if (imageCache) cached.set(fresh, { ...imageCache });
+      }
+      return repointFrames(copy, remap);
+    });
 
     return {
-      edit: (doc: Doc) => selected.reduce((d, l, i) => insertAfter(d, l.id, copies[i]), doc),
+      edit: (current: Doc) => {
+        const withCopies = { ...current, images: new Map([...current.images, ...images]) };
+
+        return selected.reduce<Doc>((d, l, i) => insertAfter(d, l.id, copies[i]), withCopies);
+      },
       added: copies[0].id,
+      cache: cached,
     };
   },
-  target: [committed, selectAdded],
+  target: duplicated,
 });
 
 // ---- clipboard ----
@@ -382,21 +428,20 @@ sample({
   }),
   target: committed,
 });
-const resolvePaste = (clip: Clip, doc: Doc): Pasted => {
-  // An id already in this document is the same picture only when it's the very same object —
-  // the counters restart per document, so everything else gets a fresh id and a copied asset.
+const resolvePaste = (clip: Clip): Pasted => {
+  // Every paste gets private assets, even within the same document, so edits don't leak to the
+  // source layer. Asset IDs are also per-document, so copies need fresh IDs across documents.
   const remap = new Map<ImageId, ImageId>();
   const images = new Map<ImageId, ImageAsset>();
   const cache = new Map<ImageId, ImageCache>();
 
   for (const [id, a] of clip.images) {
-    if (doc.images.get(id) === a) continue;
     const fresh = newImageId();
     const c = clip.cache.get(id);
 
     remap.set(id, fresh);
-    images.set(fresh, { ...a, id: fresh });
-    if (c) cache.set(fresh, c);
+    images.set(fresh, { ...a, id: fresh, data: a.data.slice() });
+    if (c) cache.set(fresh, { ...c });
   }
   return { layers: clip.layers.map((l) => repointFrames(cloneLayer(l), remap)), images, cache };
 };
@@ -405,7 +450,7 @@ sample({
   clock: pasteRequested,
   source: { clip: $clipboard, doc: $doc },
   filter: ({ clip, doc }) => Boolean(clip?.layers.length && doc),
-  fn: ({ clip, doc }) => resolvePaste(clip!, doc!),
+  fn: ({ clip }) => resolvePaste(clip!),
   target: pasted,
 });
 
@@ -446,9 +491,9 @@ sample({
 });
 sample({
   clock: imported,
-  fn: ({ doc, clips }) =>
+  fn: ({ clips }) =>
     clips
-      .map((clip) => resolvePaste(clip, doc!))
+      .map((clip) => resolvePaste(clip))
       .reduce((a, b) => ({
         layers: [...a.layers, ...b.layers],
         images: new Map([...a.images, ...b.images]),

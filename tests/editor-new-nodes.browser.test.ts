@@ -164,8 +164,12 @@ test("group wraps in place and duplicate copies the whole subtree", async () => 
 
   expect(copy.id).not.toBe(groupId);
   expect(copy.children).toHaveLength((byId(groupId) as GroupLayer).children.length);
-  // the copy shares the original's assets rather than cloning the pixels
-  expect(framesOf(copy.children[0])).toEqual(framesOf((byId(groupId) as GroupLayer).children[0]));
+  const sourceFrames = framesOf((byId(groupId) as GroupLayer).children[0]);
+  const copiedFrames = framesOf(copy.children[0]);
+
+  expect(copiedFrames).toHaveLength(sourceFrames.length);
+  expect(copiedFrames.some((id) => sourceFrames.includes(id))).toBe(false);
+  for (const id of copiedFrames) expect(doc().images.get(id)).toBeDefined();
 });
 
 test("visibility conditions stack up on the selection", async () => {

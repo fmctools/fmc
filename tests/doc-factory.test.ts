@@ -28,7 +28,9 @@ import {
   newProgressLine,
   newRing,
   progressLineOf,
+  capabilityByte,
   withName,
+  withCapabilityByte,
 } from "../src/lib/modules/editor/core/document/factory";
 import {
   progressLineColor,
@@ -128,6 +130,17 @@ test("renaming keeps the header's trailing byte and cuts only the header copy", 
   expect(built.screens[0].subs!.find((n) => n.tag === TAG.name)?.text).toBe(
     "A name well over fifteen",
   );
+});
+
+test("the selected customization mode reaches byte 0x17 and its footer mirror", () => {
+  const fresh = blankDoc("Custom", res(2, 2), res(SCREEN, SCREEN));
+  const doc = withCapabilityByte(fresh, 0x0e);
+  const built = buildBin(toLegacy(doc));
+
+  expect(capabilityByte(doc)).toBe(0x0e);
+  expect(built[0x17]).toBe(0x0e);
+  expect(built[built.length - 36 + 0x17]).toBe(0x0e);
+  expect(capabilityByte(withName(doc, "Renamed"))).toBe(0x0e);
 });
 
 // #61: the format has no linear gauge, so a progress line is a battery picker with one frame per

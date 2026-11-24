@@ -7,6 +7,7 @@
   import { Icon } from "$lib/shared/components/icon";
   import { holdCursor } from "$lib/shared/lib/hold-cursor";
   import { Menu, MenuItem } from "$lib/shared/components/menu";
+  import { Select } from "$lib/shared/components/select";
   import { authModel } from "$lib/modules/auth/model";
   import { marketModel } from "$lib/modules/market/model";
   import PublishDialog from "../components/PublishDialog.svelte";
@@ -48,6 +49,7 @@
     type ShortcutActions,
   } from "../shared/shortcuts";
   import { editorModel } from "../model";
+  import { capabilityByte } from "../core/document/factory";
   import TreePanel from "../components/TreePanel.svelte";
   import PropsPanel from "../components/PropsPanel.svelte";
   import SimPanel from "../components/SimPanel.svelte";
@@ -120,12 +122,29 @@
     buildCurrentBin,
     previewBlob,
     previewThumb,
+    capabilityByteSet,
     $showWatchFrame: showWatchFrame,
     watchFrameToggled,
     $rightPanel: rightPanel,
     rightPanelSet,
     $loading: loading,
   } = editorModel;
+
+  const customizationOptions = [
+    { value: "0x08", label: "No customization", short: "None" },
+    { value: "0x0a", label: "Accent color customization", short: "Accent color" },
+    { value: "0x0e", label: "Functions and color customization", short: "Functions + colors" },
+  ];
+
+  function customizationValue() {
+    const byte = $doc ? capabilityByte($doc) : 0x0a;
+
+    // Stock files also contain function-only and mixed legacy flags. Classify them into the
+    // closest option until the user chooses a mode explicitly.
+    if (byte & 0x04) return "0x0e";
+    if (byte & 0x02) return "0x0a";
+    return "0x08";
+  }
 
   let canvas = $state<HTMLCanvasElement | null>(null);
   let fileInput = $state<HTMLInputElement>();
@@ -640,6 +659,13 @@
         />
       </div>
       <div class="zone end">
+        <span class="tool-slot customization" title="Watch customization">
+          <Select
+            options={customizationOptions}
+            value={customizationValue()}
+            onChange={(value) => capabilityByteSet(Number(value))}
+          />
+        </span>
         {#if $user}
           <span
             class="tool-slot"
@@ -971,6 +997,9 @@
   .tool-slot {
     display: inline-flex;
   }
+  .customization {
+    width: 10.5rem;
+  }
   /* a phone: document left, output right in the toolbar; the screen switch floats over the
      top of the canvas instead of taking a row of its own */
   @media (max-width: 767px) {
@@ -991,6 +1020,9 @@
         -webkit-backdrop-filter: blur(1rem);
         backdrop-filter: blur(1rem);
       }
+    }
+    .customization {
+      width: 7.5rem;
     }
   }
   @media (min-width: 768px) {
